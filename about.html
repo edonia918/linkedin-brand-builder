@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About - LaunchBrand</title>
+  <meta name="description" content="Learn about the story behind LaunchBrand and why we built the most focused LinkedIn branding tool for beginners." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── About Hero ─────────────────────────── */
+    .about-hero {
+      padding: calc(var(--nav-height) + 80px) 0 0;
+      background: #FFFFFF;
+    }
+    .about-hero-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: end;
+    }
+    .about-hero-content {
+      padding-bottom: 80px;
+    }
+    .about-hero-content h1 { margin-bottom: 1.25rem; font-weight: 400; }
+    .about-hero-content > p { font-size: 1.125rem; margin-bottom: 2rem; }
+    .about-hero-photo {
+      position: relative;
+      display: flex;
+      justify-content: center;
+    }
+    .main-photo-frame {
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 3/4;
+      border-radius: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    /* REPLACE: Swap the photo-placeholder div below with <img> tag */
+    .main-photo-frame .photo-placeholder { width: 100%; height: 100%; border-radius: 0; }
+    .about-badge {
+      position: absolute;
+      bottom: 24px;
+      left: -20px;
+      background: white;
+      border-radius: 0;
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+    }
+    .about-badge strong { display: block; font-size: 1.125rem; font-weight: 400; color: var(--text); }
+    .about-badge span { font-size: 0.875rem; color: var(--text-muted); }
+
+    /* ── Story Section ──────────────────────── */
+    .story-section {
+      padding: 96px 0;
+    }
+    .story-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .story-content h2 { margin-bottom: 1.5rem; font-weight: 400; }
+    .story-content p { margin-bottom: 1.25rem; font-size: 1.0625rem; }
+    .story-content p:last-child { margin-bottom: 0; }
+    .story-pull-quote {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      padding: 1.5rem;
+      border-radius: 0;
+      margin: 1.75rem 0;
+    }
+    .story-pull-quote p {
+      font-size: 1.125rem;
+      font-style: italic;
+      color: var(--primary-dark);
+      font-weight: 400;
+      margin: 0;
+    }
+    .story-photo-stack {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      position: relative;
+    }
+    .story-photo-frame {
+      aspect-ratio: 1;
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .story-photo-frame:first-child {
+      grid-column: span 2;
+      aspect-ratio: 16/9;
+    }
+    .story-photo-frame .photo-placeholder { width: 100%; height: 100%; border-radius: 0; }
+
+    /* ── Video Section ──────────────────────── */
+    .video-section {
+      background: var(--secondary);
+      padding: 96px 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .video-section::before {
+      display: none;
+    }
+    .video-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      position: relative;
+    }
+    .video-content .label { background: rgba(255,255,255,0.12); color: white; }
+    .video-content h2 { color: white; margin-bottom: 1.25rem; font-weight: 400; }
+    .video-content p { color: rgba(255,255,255,0.75); font-size: 1.0625rem; margin-bottom: 1rem; }
+    .video-embed-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+      background: #0D1B2A;
+    }
+    .video-embed-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+    /* Placeholder when no video is embedded yet */
+    .video-placeholder-frame {
+      position: relative;
+      padding-bottom: 56.25%;
+      border-radius: 0;
+      overflow: hidden;
+      background: var(--primary);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+    .video-placeholder-inner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: white;
+    }
+    .play-button {
+      width: 72px; height: 72px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+      border: 3px solid rgba(255,255,255,0.4);
+    }
+    .video-placeholder-frame:hover .play-button {
+      background: rgba(255,255,255,0.35);
+      transform: scale(1.1);
+    }
+    .play-button svg { margin-left: 4px; }
+    .video-placeholder-inner p { color: rgba(255,255,255,0.8); font-size: 0.9375rem; }
+    .video-placeholder-inner strong { color: white; font-size: 1.125rem; }
+    .video-note {
+      margin-top: 1rem;
+      color: rgba(255,255,255,0.5);
+      font-size: 0.8125rem;
+      text-align: center;
+    }
+
+    /* ── Values ─────────────────────────────── */
+    .values-section { padding: 96px 0; background: var(--bg); }
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+    .value-card {
+      text-align: center;
+      padding: 2.5rem 2rem;
+    }
+    .value-emoji { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+    .value-card h3 { margin-bottom: 0.75rem; font-weight: 400; }
+
+    /* ── Photos Gallery ─────────────────────── */
+    .photos-section { padding: 80px 0; }
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .gallery-photo {
+      aspect-ratio: 4/5;
+      border-radius: 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .gallery-photo img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+    .gallery-photo:hover img { transform: scale(1.05); }
+    .gallery-photo .photo-placeholder { width: 100%; height: 100%; border-radius: 0; }
+    .gallery-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.6));
+      padding: 2rem 1.25rem 1.25rem;
+      color: white;
+    }
+    .gallery-caption strong { display: block; font-size: 0.9375rem; font-weight: 400; }
+    .gallery-caption span { font-size: 0.8125rem; opacity: 0.8; }
+
+    @media (max-width: 900px) {
+      .about-hero-inner,
+      .story-inner,
+      .video-inner { grid-template-columns: 1fr; }
+      .about-hero-photo { display: none; }
+      .values-grid,
+      .photos-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 600px) {
+      .values-grid,
+      .photos-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/></svg>
+      </div>
+      LaunchBrand
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="signin.html" class="nav-cta">Sign In</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="how-it-works.html">How It Works</a>
+  <a href="contact.html">Contact</a>
+  <a href="#">Sign In</a>
+</div>
+
+<!-- ── About Hero ─────────────────────────── -->
+<section class="about-hero">
+  <div class="container">
+    <div class="about-hero-inner">
+      <div class="about-hero-content fade-in">
+        <div class="label">Meet the Founder</div>
+        <h1>I built this because I needed it.</h1>
+        <p>When I graduated, I had real experiences - internships, projects, coursework - but no idea how to talk about them professionally. LaunchBrand is what I wish existed then.</p>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+          <a href="how-it-works.html" class="btn btn-primary">Try the Demo</a>
+          <a href="contact.html" class="btn btn-secondary">Get in Touch</a>
+        </div>
+      </div>
+      <div class="about-hero-photo fade-in fade-in-delay-2">
+        <div class="main-photo-frame">
+          <img src="images/IMG_7184.JPG" alt="Elizabeth Donia" style="width:100%;height:100%;object-fit:cover;object-position:center top;" />
+        </div>
+        <div class="about-badge">
+          <strong>Hi, I'm Liz 👋</strong>
+          <span>Founder of LaunchBrand</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Story ───────────────────────────────── -->
+<section class="story-section">
+  <div class="container">
+    <div class="story-inner">
+      <div class="story-content fade-in">
+        <div class="label">My Story</div>
+        <h2>From invisible online to<br/>getting noticed by recruiters</h2>
+        <p>When I first graduated, I had an internship at a local firm, two class projects I was genuinely proud of, and a LinkedIn profile that hadn't been updated in three years. I knew I needed a presence online, but every time I sat down to write a post, I froze.</p>
+        <div class="story-pull-quote">
+          <p>"What would I even say? Who would care? I wasn't a thought leader - I was a new grad trying to get a job."</p>
+        </div>
+        <p>After months of trial and error, I cracked the code. The secret to LinkedIn wasn't sounding impressive. It was learning how to frame ordinary experiences in a way that showed self awareness, growth, and genuine curiosity.</p>
+        <p>So I built LaunchBrand - a tool that helps people just like I was take the experiences they already have and turn them into content that actually builds a career.</p>
+      </div>
+      <div class="fade-in fade-in-delay-2">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+          <div style="aspect-ratio:3/4; overflow:hidden; border-radius:var(--radius-lg);">
+            <img src="images/IMG_9779.jpeg" alt="Elizabeth at PepsiCo event" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+          <div style="aspect-ratio:3/4; overflow:hidden; border-radius:var(--radius-lg);">
+            <img src="images/IMG_2986.jpeg" alt="Elizabeth outdoors" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Video / 30-second Pitch ────────────── -->
+<section class="video-section">
+  <div class="container">
+    <div class="video-inner">
+      <div class="video-content fade-in">
+        <div class="label">30 Second Pitch</div>
+        <h2>Hear it straight from me.</h2>
+        <p>In 30 seconds, I'll explain exactly who LaunchBrand is for, what it does, and why it's different from every other writing tool you've tried.</p>
+        <p>No fluff. No demos. Just the honest pitch I wish someone had given me when I was first starting out.</p>
+        <a href="how-it-works.html" class="btn btn-accent" style="margin-top:0.5rem;">
+          Try the Demo After →
+        </a>
+      </div>
+      <div class="fade-in fade-in-delay-2">
+        <!--
+          EMBED YOUR VIDEO:
+          Option A - YouTube: Replace the placeholder below with:
+          <div class="video-embed-container">
+            <iframe src="https://www.youtube.com/embed/YOUR_VIDEO_ID" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+
+          Option B - Vimeo:
+          <div class="video-embed-container">
+            <iframe src="https://player.vimeo.com/video/YOUR_VIDEO_ID" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+          </div>
+        -->
+        <div class="video-embed-container">
+          <iframe src="https://www.youtube.com/embed/ko_8DAtEYCM" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Values ─────────────────────────────── -->
+<section class="values-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="label">What I Believe</div>
+      <h2>Three principles behind everything I build</h2>
+    </div>
+    <div class="values-grid">
+      <div class="card value-card fade-in fade-in-delay-1">
+        <span class="value-emoji">🌱</span>
+        <h3>Everyone Starts Somewhere</h3>
+        <p>No one is born knowing how to build a personal brand. The tools and guidance you need to get started should be accessible, approachable, and built for beginners - not polished professionals.</p>
+      </div>
+      <div class="card value-card fade-in fade-in-delay-2">
+        <span class="value-emoji">🎯</span>
+        <h3>Specificity Beats Generality</h3>
+        <p>Generic writing tools will give you a generic post. LinkedIn success for early career professionals requires specific insights. What hooks work, what industries respond to, and what recruiters actually look for.</p>
+      </div>
+      <div class="card value-card fade-in fade-in-delay-3">
+        <span class="value-emoji">🔑</span>
+        <h3>Your Story Is Already There</h3>
+        <p>You don't need more experience to start building your brand. You need a better lens for the experience you already have. That's exactly what LaunchBrand helps you find.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────── -->
+<section class="section" style="background: var(--primary-light); padding: 80px 0;">
+  <div class="container" style="text-align:center;">
+    <div class="fade-in">
+      <div class="label" style="margin: 0 auto 1.25rem;">Ready to Start?</div>
+      <h2 style="margin-bottom:1rem;">Your LinkedIn presence starts<br/>with one post.</h2>
+      <p style="max-width:500px; margin:0 auto 2rem;">Try the interactive AI demo: paste your experience, pick your industry, and see a real LinkedIn post generated in under 30 seconds.</p>
+      <a href="how-it-works.html" class="btn btn-primary btn-lg">Try the Demo Now →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo">
+          <div class="nav-logo-icon">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/></svg>
+          </div>
+          LaunchBrand
+        </a>
+        <p>AI powered LinkedIn brand builder for early career professionals who want to show up confidently online.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Pages</h5>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="how-it-works.html">How It Works</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <ul>
+          <li><a href="how-it-works.html">AI Demo</a></li>
+          <li><a href="how-it-works.html">Post Generator</a></li>
+          <li><a href="how-it-works.html">Content Calendar</a></li>
+          <li><a href="contact.html">Support</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 LaunchBrand. All rights reserved.</span>
+      <div class="footer-socials">
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Twitter">𝕏</a>
+        <a href="#" aria-label="Instagram">ig</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

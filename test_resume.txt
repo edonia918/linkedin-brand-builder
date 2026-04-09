@@ -1,0 +1,37 @@
+John Doe
+Software Engineer
+
+Professional Summary:
+Experienced software engineer with 5+ years in full-stack development, specializing in JavaScript, React, and Node.js. Proven track record of delivering scalable web applications and leading development teams.
+
+Skills:
+- JavaScript/TypeScript
+- React, Node.js, Express
+- Python, SQL
+- AWS, Docker
+- Agile/Scrum methodology
+- Team leadership
+
+Experience:
+Senior Software Engineer at TechCorp (2020-Present)
+- Led development of microservices architecture serving 100K+ users
+- Implemented CI/CD pipelines reducing deployment time by 60%
+- Mentored junior developers and conducted technical interviews
+
+Software Engineer at StartupXYZ (2018-2020)
+- Built responsive web applications using React and Node.js
+- Collaborated with cross-functional teams to deliver features on time
+- Improved application performance by 40% through optimization
+
+Education:
+Bachelor of Science in Computer Science
+University of Technology, 2018
+
+Certifications:
+- AWS Certified Solutions Architect
+- Scrum Master Certification
+
+Achievements:
+- Employee of the Year 2022
+- Led project that increased user engagement by 35%
+- Published 3 technical articles on medium.com

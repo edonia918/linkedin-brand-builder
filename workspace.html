@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workspace - LaunchBrand</title>
+  <meta name="description" content="Your LaunchBrand workspace - upload content and generate professional LinkedIn posts." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Workspace Layout ───────────────────── */
+    .workspace {
+      min-height: 100vh;
+      background: var(--bg);
+      padding-top: calc(var(--nav-height) + 2rem);
+    }
+
+    .workspace-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .workspace-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .workspace-header h1 {
+      font-size: 2.5rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .workspace-header p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── Industry Selection ────────────────── */
+    .industry-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .industry-section h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .industry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .industry-option {
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
+
+    .industry-option:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .industry-option.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .industry-option h3 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .industry-option p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .custom-industry {
+      margin-top: 1rem;
+    }
+
+    .custom-industry input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 2px solid var(--border);
+      border-radius: 0;
+      font-size: 1rem;
+      background: var(--bg);
+    }
+
+    .custom-industry input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* ── Industry Search ────────────────────── */
+    .industry-search {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .industry-search input {
+      width: 100%;
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 0;
+      font-size: 1rem;
+      background: var(--bg);
+      transition: border-color 0.2s ease;
+    }
+
+    .industry-search input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .industry-search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 0 0;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+    }
+
+    .industry-search-result {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      transition: background-color 0.2s ease;
+    }
+
+    .industry-search-result:hover {
+      background: var(--primary-light);
+    }
+
+    .industry-search-result:last-child {
+      border-bottom: none;
+    }
+
+    /* ── Upload Section ────────────────────── */
+    .upload-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .upload-section h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 0;
+      padding: 3rem 2rem;
+      text-align: center;
+      background: var(--bg);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      margin-bottom: 2rem;
+    }
+
+    .upload-area:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .upload-area.dragover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .upload-icon {
+      width: 3rem;
+      height: 3rem;
+      margin: 0 auto 1rem;
+      opacity: 0.6;
+    }
+
+    .upload-area h3 {
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .upload-area p {
+      color: var(--text-muted);
+      margin-bottom: 0;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-list {
+      margin-top: 2rem;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      margin-bottom: 0.5rem;
+    }
+
+    .file-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .file-icon {
+      width: 2rem;
+      height: 2rem;
+      opacity: 0.6;
+    }
+
+    .file-details h4 {
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin: 0 0 0.25rem 0;
+      color: var(--text);
+    }
+
+    .file-details p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .file-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 0;
+      transition: color 0.2s ease;
+    }
+
+    .file-remove:hover {
+      color: #dc3545;
+    }
+
+    /* ── Generate Section ──────────────────── */
+    .generate-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .generate-section h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .generate-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 500;
+      border-radius: 0;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .generate-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .generate-btn:disabled {
+      background: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    .post-type-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .post-type-section h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .post-type-section p {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .post-type-select {
+      width: 100%;
+      max-width: 420px;
+      padding: 0.85rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .post-type-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .payment-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .payment-section h2 {
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .payment-section p {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+
+    .payment-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      margin-bottom: 1.5rem;
+    }
+
+    .payment-status strong {
+      color: var(--text);
+    }
+
+    .payment-form {
+      display: none;
+      margin-top: 1.5rem;
+    }
+
+    .payment-form-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .payment-form-row label {
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+
+    .payment-input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: 0;
+      background: var(--bg);
+      font-size: 1rem;
+    }
+
+    .payment-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .payment-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 0.75rem;
+    }
+
+    .payment-message {
+      margin-top: 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .payment-success {
+      color: var(--success);
+    }
+
+    /* ── Progress & Results ────────────────── */
+    .progress-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      margin-top: 2rem;
+      box-shadow: var(--shadow-sm);
+      display: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 0;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+    }
+
+    .results-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      margin-top: 2rem;
+      box-shadow: var(--shadow-sm);
+      display: none;
+    }
+
+    .post-card {
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      background: var(--bg);
+    }
+
+    .post-card h3 {
+      font-size: 1.125rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .post-content {
+      color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      white-space: pre-wrap;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .post-btn {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--white);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+
+    .post-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .post-btn.primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .post-btn.primary:hover {
+      background: var(--primary-dark);
+    }
+
+    /* ── Content Calendar Preview ─────────── */
+    .calendar-preview-section {
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      margin-top: 2rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .calendar-preview-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .calendar-preview-body {
+      position: relative;
+    }
+
+    .calendar-blur-wrap {
+      position: relative;
+    }
+
+    .calendar-grid-preview {
+      display: grid;
+      grid-template-columns: 80px repeat(4, 1fr);
+      gap: 0.75rem;
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .cal-week-label {
+      grid-column: span 1;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.5rem 0;
+      text-align: center;
+    }
+
+    /* push week labels to correct columns */
+    .cal-week-label:first-child { grid-column: 2; }
+
+    .cal-day-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .cal-entry {
+      border-radius: 0;
+      padding: 0.875rem 1rem;
+      border-left: 3px solid transparent;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .cal-entry-story  { border-left-color: var(--accent); }
+    .cal-entry-advice { border-left-color: var(--success); }
+    .cal-entry-leadership { border-left-color: var(--primary); }
+    .cal-entry-showcase   { border-left-color: #7C3AED; }
+    .cal-entry-career     { border-left-color: #0EA5E9; }
+    .cal-entry-empty  { border-left-color: var(--border); opacity: 0.5; }
+
+    .cal-day-name {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .cal-entry-type {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .cal-entry-title {
+      font-size: 0.875rem;
+      color: var(--text);
+      line-height: 1.45;
+      margin: 0;
+    }
+
+    .cal-entry-rest {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    /* Lock overlay */
+    .calendar-lock-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(to bottom, rgba(250,251,250,0.1) 0%, rgba(250,251,250,0.85) 35%, rgba(250,251,250,1) 60%);
+      padding: 2rem;
+    }
+
+    .lock-box {
+      background: var(--white);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      padding: 2.5rem 2rem;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .lock-icon {
+      width: 56px; height: 56px;
+      background: var(--primary-light);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      color: var(--primary);
+    }
+
+    .lock-box h3 {
+      font-size: 1.25rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .lock-box > p {
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+
+    .lock-perks {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: left;
+      background: var(--primary-light);
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(61,90,80,0.15);
+    }
+
+    .lock-perk {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .lock-perk .check-icon {
+      width: 20px; height: 20px;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+
+    /* ── Responsive ────────────────────────── */
+    @media (max-width: 768px) {
+      .workspace-container {
+        padding: 0 1rem;
+      }
+
+      .workspace-header h1 {
+        font-size: 2rem;
+      }
+
+      .industry-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .upload-area {
+        padding: 2rem 1rem;
+      }
+
+      .post-actions {
+        flex-direction: column;
+      }
+
+      .post-btn {
+        width: 100%;
+      }
+
+      .calendar-preview-header {
+        flex-direction: column;
+      }
+
+      .calendar-grid-preview {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .cal-week-label:first-child { grid-column: 1; }
+
+      .lock-box {
+        padding: 1.75rem 1.25rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ── Navigation ─────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">
+        <div class="nav-logo-icon">
+          <svg viewBox="0 0 20 20" fill="none">
+            <path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/>
+          </svg>
+        </div>
+        LaunchBrand
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="how-it-works.html">How It Works</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="workspace.html" class="active">Workspace</a></li>
+        <li><a href="signin.html">Sign Out</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="how-it-works.html">How It Works</a>
+    <a href="contact.html">Contact</a>
+    <a href="workspace.html" class="active">Workspace</a>
+    <a href="signin.html">Sign Out</a>
+  </div>
+
+  <!-- ── Workspace ─────────────────────────── -->
+  <main class="workspace">
+    <div class="workspace-container">
+      <header class="workspace-header">
+        <h1>Welcome to Your Workspace</h1>
+        <p>Upload your content and let LaunchBrand create professional LinkedIn posts tailored to your industry.</p>
+      </header>
+
+      <!-- Industry Selection -->
+      <section class="industry-section" id="industrySection">
+        <h2>What industry are you in?</h2>
+        <div class="industry-search">
+          <input type="text" id="industrySearch" placeholder="Search for your industry..." autocomplete="off">
+          <div class="industry-search-results" id="industrySearchResults"></div>
+        </div>
+        <div class="industry-grid" id="industryGrid">
+          <div class="industry-option" data-industry="technology">
+            <h3>Technology</h3>
+            <p>Software, IT, AI, Engineering</p>
+          </div>
+          <div class="industry-option" data-industry="finance">
+            <h3>Finance</h3>
+            <p>Banking, Investment, FinTech</p>
+          </div>
+          <div class="industry-option" data-industry="healthcare">
+            <h3>Healthcare</h3>
+            <p>Medical, Pharma, Biotech</p>
+          </div>
+          <div class="industry-option" data-industry="marketing">
+            <h3>Marketing</h3>
+            <p>Digital Marketing, Advertising, PR</p>
+          </div>
+          <div class="industry-option" data-industry="consulting">
+            <h3>Consulting</h3>
+            <p>Management, Strategy, Advisory</p>
+          </div>
+          <div class="industry-option" data-industry="education">
+            <h3>Education</h3>
+            <p>Teaching, Training, EdTech</p>
+          </div>
+          <div class="industry-option" data-industry="retail">
+            <h3>Retail & E-commerce</h3>
+            <p>Sales, Customer Service, Operations</p>
+          </div>
+          <div class="industry-option" data-industry="other">
+            <h3>Other</h3>
+            <p>Creative, Legal, Government, etc.</p>
+          </div>
+        </div>
+        <div class="custom-industry" style="display: none;">
+          <input type="text" id="customIndustry" placeholder="Or specify your industry..." maxlength="100">
+        </div>
+      </section>
+
+      <!-- Upload Section -->
+      <section class="upload-section" id="uploadSection">
+        <h2>Upload Your Documents</h2>
+        <p>Upload your resume, project files, certificates, or any content you'd like LaunchBrand to analyze and turn into professional LinkedIn posts.</p>
+        <div class="upload-area" id="uploadArea">
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none">
+            <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" stroke-width="2"/>
+            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2"/>
+            <path d="M16 13H8" stroke="currentColor" stroke-width="2"/>
+            <path d="M16 17H8" stroke="currentColor" stroke-width="2"/>
+            <path d="M10 9H8" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <h3>Drop files here or click to browse</h3>
+          <p>Upload resumes, project documents, certificates, presentations, or any professional content. We'll analyze it to create tailored LinkedIn posts.</p>
+          <input type="file" id="fileInput" class="file-input" multiple accept="image/*,.pdf,.doc,.docx,.txt,.ppt,.pptx,.rtf">
+        </div>
+        <div class="file-list" id="fileList"></div>
+      </section>
+
+      <!-- Post Type Section -->
+      <section class="post-type-section" id="postTypeSection">
+        <h2>What kind of post do you want?</h2>
+        <p>Select the tone and style for your LinkedIn posts.</p>
+        <select id="postTypeSelect" class="post-type-select">
+          <option value="thought-leadership">Thought Leadership - Position yourself as an industry expert</option>
+          <option value="career-update">Career Update - Share professional growth and achievements</option>
+          <option value="project-showcase">Project Showcase - Highlight your work and impact</option>
+          <option value="personal-story">Personal Story - Connect emotionally with your journey</option>
+          <option value="advice">Advice & Tips - Share practical insights and guidance</option>
+        </select>
+      </section>
+
+      <!-- Generate Section -->
+      <section class="generate-section" id="generateSection">
+        <h2>Generate Your LinkedIn Posts</h2>
+        <p>LaunchBrand will analyze your uploaded documents and create professional, engaging LinkedIn posts tailored to your industry and selected tone.</p>
+        <button class="generate-btn" id="generateBtn" disabled>Generate Posts</button>
+      </section>
+
+      <!-- Progress Section -->
+      <section class="progress-section" id="progressSection">
+        <h2>Analyzing Your Content</h2>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <p class="progress-text" id="progressText">Processing files...</p>
+      </section>
+
+      <!-- Results Section -->
+      <section class="results-section" id="resultsSection">
+        <h2>Your Generated Posts</h2>
+        <div id="postsContainer"></div>
+      </section>
+
+      <!-- Content Calendar Preview (locked) -->
+      <section class="calendar-preview-section" id="calendarPreview" style="display:none;">
+        <div class="calendar-preview-header">
+          <div>
+            <div class="label" style="margin-bottom:0.75rem;">Pro Feature</div>
+            <h2 style="font-weight:400; margin-bottom:0.5rem;">Your 30-Day Content Calendar</h2>
+            <p style="font-size:1rem;">A personalized posting plan generated from your story — unlocked when you subscribe.</p>
+          </div>
+          <a href="signin.html" class="btn btn-primary">Unlock Full Calendar →</a>
+        </div>
+
+        <div class="calendar-preview-body">
+          <!-- Blurred calendar content -->
+          <div class="calendar-blur-wrap">
+            <div class="calendar-grid-preview">
+              <!-- Week headers -->
+              <div class="cal-week-label">Week 1</div>
+              <div class="cal-week-label">Week 2</div>
+              <div class="cal-week-label">Week 3</div>
+              <div class="cal-week-label">Week 4</div>
+
+              <!-- Day rows -->
+              <div class="cal-day-col">
+                <div class="cal-entry cal-entry-story">
+                  <span class="cal-day-name">Mon</span>
+                  <span class="cal-entry-type">Personal Story</span>
+                  <p class="cal-entry-title">Your first internship moment that changed everything</p>
+                </div>
+                <div class="cal-entry cal-entry-empty">
+                  <span class="cal-day-name">Wed</span>
+                  <span class="cal-entry-rest">Rest day</span>
+                </div>
+                <div class="cal-entry cal-entry-advice">
+                  <span class="cal-day-name">Fri</span>
+                  <span class="cal-entry-type">Advice</span>
+                  <p class="cal-entry-title">3 things no one tells you about your first 90 days</p>
+                </div>
+              </div>
+              <div class="cal-day-col">
+                <div class="cal-entry cal-entry-leadership">
+                  <span class="cal-day-name">Mon</span>
+                  <span class="cal-entry-type">Thought Leadership</span>
+                  <p class="cal-entry-title">What I learned leading a project with no experience</p>
+                </div>
+                <div class="cal-entry cal-entry-empty">
+                  <span class="cal-day-name">Wed</span>
+                  <span class="cal-entry-rest">Rest day</span>
+                </div>
+                <div class="cal-entry cal-entry-showcase">
+                  <span class="cal-day-name">Fri</span>
+                  <span class="cal-entry-type">Project Showcase</span>
+                  <p class="cal-entry-title">Breaking down the project I almost gave up on</p>
+                </div>
+              </div>
+              <div class="cal-day-col">
+                <div class="cal-entry cal-entry-career">
+                  <span class="cal-day-name">Tue</span>
+                  <span class="cal-entry-type">Career Update</span>
+                  <p class="cal-entry-title">6 months in — here's what surprised me most</p>
+                </div>
+                <div class="cal-entry cal-entry-empty">
+                  <span class="cal-day-name">Thu</span>
+                  <span class="cal-entry-rest">Rest day</span>
+                </div>
+                <div class="cal-entry cal-entry-advice">
+                  <span class="cal-day-name">Fri</span>
+                  <span class="cal-entry-type">Advice</span>
+                  <p class="cal-entry-title">How I stopped saying "just" in every email</p>
+                </div>
+              </div>
+              <div class="cal-day-col">
+                <div class="cal-entry cal-entry-story">
+                  <span class="cal-day-name">Mon</span>
+                  <span class="cal-entry-type">Personal Story</span>
+                  <p class="cal-entry-title">The rejection that redirected my entire career path</p>
+                </div>
+                <div class="cal-entry cal-entry-showcase">
+                  <span class="cal-day-name">Wed</span>
+                  <span class="cal-entry-type">Project Showcase</span>
+                  <p class="cal-entry-title">The problem I solved that no one asked me to solve</p>
+                </div>
+                <div class="cal-entry cal-entry-leadership">
+                  <span class="cal-day-name">Fri</span>
+                  <span class="cal-entry-type">Thought Leadership</span>
+                  <p class="cal-entry-title">Why "entry level" is a mindset, not a job title</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lock overlay -->
+            <div class="calendar-lock-overlay">
+              <div class="lock-box">
+                <div class="lock-icon">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2"/>
+                    <path d="M7 11V7a5 5 0 0110 0v4"/>
+                  </svg>
+                </div>
+                <h3>Unlock Your Full Calendar</h3>
+                <p>Subscribe to LaunchBrand to get your personalized 30-day posting plan with exact post ideas, timing, and mix tailored to your industry and story.</p>
+                <div class="lock-perks">
+                  <div class="lock-perk"><span class="check-icon">✓</span> 30 personalized post ideas</div>
+                  <div class="lock-perk"><span class="check-icon">✓</span> Optimal days &amp; times for your industry</div>
+                  <div class="lock-perk"><span class="check-icon">✓</span> Balanced mix of post types</div>
+                  <div class="lock-perk"><span class="check-icon">✓</span> Regenerate anytime with new content</div>
+                </div>
+                <a href="signin.html" class="btn btn-primary btn-lg" style="margin-top:1.5rem;">Get Full Access — $18.99/mo</a>
+                <p style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.75rem;">7-day free trial · Cancel anytime</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="payment-section">
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Subscribe now and receive a curated <strong>30-day content calendar</strong> designed to keep your LinkedIn narrative consistent, strategic, and high-impact.
+        </p>
+        <h2>Payment Method</h2>
+        <p>Securely add a payment method now so your service can continue seamlessly after the 7-day free trial ends. You can still use LaunchBrand while your trial is active.</p>
+        <div class="payment-status" id="paymentStatus">
+          <span><strong>No payment method on file.</strong></span>
+          <button class="post-btn primary" id="showPaymentFormBtn">Add Payment Method</button>
+        </div>
+
+        <form class="payment-form" id="paymentForm">
+          <div class="payment-form-row">
+            <label for="cardName">Cardholder Name</label>
+            <input id="cardName" class="payment-input" type="text" placeholder="Jane Doe" />
+          </div>
+          <div class="payment-form-row">
+            <label for="cardNumber">Card Number</label>
+            <input id="cardNumber" class="payment-input" type="text" placeholder="1234 5678 9012 3456" maxlength="19" />
+          </div>
+          <div class="payment-form-row">
+            <label for="cardExpiry">Expiration Date</label>
+            <input id="cardExpiry" class="payment-input" type="text" placeholder="MM/YY" maxlength="5" />
+          </div>
+          <div class="payment-form-row">
+            <label for="cardCvc">CVC</label>
+            <input id="cardCvc" class="payment-input" type="text" placeholder="123" maxlength="4" />
+          </div>
+          <div class="payment-actions">
+            <button type="button" class="post-btn primary" id="savePaymentBtn">Save Payment Method</button>
+            <button type="button" class="post-btn" id="cancelPaymentBtn">Cancel</button>
+          </div>
+          <p class="payment-message" id="paymentMessage">We do not store real card details on this page. This entry is only for launch workflow simulation.</p>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <!-- ── Footer ─────────────────────────────── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="nav-logo">
+            <div class="nav-logo-icon">
+              <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/></svg>
+            </div>
+            LaunchBrand
+          </a>
+          <p>Build your professional brand with authentic, meaningful stories.</p>
+        </div>
+        <div class="footer-col">
+          <h5>Pages</h5>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="how-it-works.html">How It Works</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Product</h5>
+          <ul>
+            <li><a href="workspace.html">Workspace</a></li>
+            <li><a href="index.html">Early Access</a></li>
+            <li><a href="contact.html">Support</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 LaunchBrand. All rights reserved.</span>
+        <div class="footer-socials">
+          <a href="#" aria-label="LinkedIn">in</a>
+          <a href="#" aria-label="Twitter">𝕏</a>
+          <a href="#" aria-label="Instagram">ig</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // ── Workspace Functionality ──────────────
+    document.addEventListener('DOMContentLoaded', function() {
+      // Industry selection with search
+      let selectedIndustry = null;
+      const industrySearch = document.getElementById('industrySearch');
+      const industrySearchResults = document.getElementById('industrySearchResults');
+      const industryGrid = document.getElementById('industryGrid');
+      const uploadSection = document.getElementById('uploadSection');
+      const postTypeSection = document.getElementById('postTypeSection');
+      const generateSection = document.getElementById('generateSection');
+
+      // Available industries for search
+      const availableIndustries = [
+        'Technology', 'Finance', 'Healthcare', 'Marketing', 'Consulting',
+        'Education', 'Retail & E-commerce', 'Manufacturing', 'Real Estate',
+        'Legal', 'Government', 'Non-profit', 'Creative', 'Hospitality',
+        'Transportation', 'Energy', 'Agriculture', 'Construction', 'Media',
+        'Telecommunications', 'Pharmaceuticals', 'Biotechnology', 'Automotive',
+        'Aerospace', 'Defense', 'Entertainment', 'Sports', 'Fashion', 'Food & Beverage'
+      ];
+
+      function showIndustrySearchResults(query) {
+        if (!query.trim()) {
+          industrySearchResults.style.display = 'none';
+          industryGrid.style.display = 'grid';
+          return;
+        }
+
+        const filtered = availableIndustries.filter(industry =>
+          industry.toLowerCase().includes(query.toLowerCase())
+        );
+
+        if (filtered.length > 0) {
+          industrySearchResults.innerHTML = filtered.map(industry => `
+            <div class="industry-search-result" data-industry="${industry.toLowerCase().replace(/\s+/g, '-').replace('&', 'and')}">
+              ${industry}
+            </div>
+          `).join('');
+          industrySearchResults.style.display = 'block';
+          industryGrid.style.display = 'none';
+        } else {
+          industrySearchResults.innerHTML = `
+            <div class="industry-search-result" data-industry="custom">
+              Use "${query}" as custom industry
+            </div>
+          `;
+          industrySearchResults.style.display = 'block';
+          industryGrid.style.display = 'none';
+        }
+      }
+
+      industrySearch.addEventListener('input', function() {
+        showIndustrySearchResults(this.value);
+      });
+
+      industrySearch.addEventListener('focus', function() {
+        if (this.value.trim()) {
+          showIndustrySearchResults(this.value);
+        }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!industrySearch.contains(e.target) && !industrySearchResults.contains(e.target)) {
+          industrySearchResults.style.display = 'none';
+          industryGrid.style.display = 'grid';
+        }
+      });
+
+      // Industry selection handlers
+      function selectIndustry(industry) {
+        selectedIndustry = industry;
+        industrySearch.value = industry.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        industrySearchResults.style.display = 'none';
+        industryGrid.style.display = 'grid';
+
+        updateGenerateButton();
+      }
+
+      industryGrid.addEventListener('click', function(e) {
+        const option = e.target.closest('.industry-option');
+        if (option) {
+          selectIndustry(option.dataset.industry);
+        }
+      });
+
+      industrySearchResults.addEventListener('click', function(e) {
+        const result = e.target.closest('.industry-search-result');
+        if (result) {
+          const industry = result.dataset.industry;
+          if (industry === 'custom') {
+            selectIndustry(industrySearch.value.trim());
+          } else {
+            selectIndustry(industry);
+          }
+        }
+      });
+
+      // File upload handling
+      let uploadedFiles = [];
+      const fileInput = document.getElementById('fileInput');
+      const uploadArea = document.getElementById('uploadArea');
+      const fileList = document.getElementById('fileList');
+
+      function handleFiles(files) {
+        const incoming = Array.from(files);
+        // Accumulate files instead of replacing
+        incoming.forEach(f => {
+          if (!uploadedFiles.find(existing => existing.name === f.name && existing.size === f.size)) {
+            uploadedFiles.push(f);
+          }
+        });
+        displayFileList();
+        updateGenerateButton();
+      }
+
+      uploadArea.addEventListener('click', () => fileInput.click());
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+      uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+      });
+
+      fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+      function displayFileList() {
+        fileList.innerHTML = uploadedFiles.map((file, index) => `
+          <div class="file-item">
+            <div class="file-info">
+              <div class="file-icon">${getFileIcon(file.type)}</div>
+              <div class="file-details">
+                <h4>${file.name}</h4>
+                <p>${formatFileSize(file.size)}</p>
+              </div>
+            </div>
+            <button class="file-remove" onclick="removeFile(${index})">×</button>
+          </div>
+        `).join('');
+      }
+
+      function removeFile(index) {
+        uploadedFiles.splice(index, 1);
+        displayFileList();
+        updateGenerateButton();
+      }
+
+      window.removeFile = removeFile;
+
+      function getFileIcon(mimeType) {
+        if (mimeType.startsWith('image/')) {
+          return '<path d="M4 4h16v16H4V4zm2 2v12h12V6H6zm2 2h8v8H8V8z" fill="currentColor"/>';
+        } else if (mimeType === 'application/pdf') {
+          return '<path d="M8 2h8l6 6v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2zm8 2v6h6v10H4V4h12z" fill="currentColor"/><path d="M10 8h4v8h-4V8z" fill="currentColor"/>';
+        } else {
+          return '<path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" stroke-width="2"/><path d="M14 2V8H20" stroke="currentColor" stroke-width="2"/>';
+        }
+      }
+
+      function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
+      // Post type selection
+      const postTypeSelect = document.getElementById('postTypeSelect');
+      let selectedPostType = 'thought-leadership';
+
+      postTypeSelect.addEventListener('change', function() {
+        selectedPostType = this.value;
+        updateGenerateButton();
+      });
+
+      function updateGenerateButton() {
+        const generateBtn = document.getElementById('generateBtn');
+        generateBtn.disabled = !selectedIndustry || uploadedFiles.length === 0 || !selectedPostType;
+      }
+
+      async function analyzeUploadedFiles(files) {
+        const fileTypes = new Set();
+        const fileNames = [];
+        const linkedinCourses = [];
+        let hasLinkedInLearning = false;
+        const fileContents = [];
+
+        return new Promise((resolve) => {
+          let processed = 0;
+          const total = files.length;
+
+          if (total === 0) {
+            resolve({
+              fileSummary: 'your uploads',
+              fileNames: '',
+              linkedinLearning: false,
+              linkedinCourses: [],
+              content: ''
+            });
+            return;
+          }
+
+          files.forEach(file => {
+            if (file.type.startsWith('image/')) fileTypes.add('images');
+            else if (file.type.includes('pdf')) fileTypes.add('documents');
+            else if (file.type.includes('word') || file.name.endsWith('.doc') || file.name.endsWith('.docx')) fileTypes.add('documents');
+            else if (file.type.includes('presentation') || file.name.endsWith('.ppt') || file.name.endsWith('.pptx')) fileTypes.add('presentations');
+            else if (file.type.includes('text') || file.name.endsWith('.txt')) fileTypes.add('notes');
+            else fileTypes.add('files');
+
+            const baseName = file.name.replace(/\.[^/.]+$/, '');
+            fileNames.push(baseName);
+
+            // Check for LinkedIn Learning content
+            if (baseName.toLowerCase().includes('linkedin') && baseName.toLowerCase().includes('learning')) {
+              hasLinkedInLearning = true;
+              // Try to extract course name - typically after "LinkedIn Learning - "
+              const courseMatch = baseName.match(/linkedin learning\s*-\s*(.+)/i);
+              if (courseMatch) {
+                linkedinCourses.push(courseMatch[1].trim());
+              } else {
+                linkedinCourses.push(baseName);
+              }
+            }
+
+            // Read file content if it's text
+            if (file.type.includes('text') || file.name.endsWith('.txt')) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                fileContents.push(`Content from ${file.name}:\n${e.target.result}\n\n`);
+                processed++;
+                if (processed === total) {
+                  resolve({
+                    fileSummary: fileTypes.size ? Array.from(fileTypes).join(', ') : 'your uploads',
+                    fileNames: fileNames.slice(0, 3).join(', '),
+                    linkedinLearning: hasLinkedInLearning,
+                    linkedinCourses: linkedinCourses,
+                    content: fileContents.join('')
+                  });
+                }
+              };
+              reader.onerror = () => {
+                fileContents.push(`Could not read content from ${file.name}\n`);
+                processed++;
+                if (processed === total) {
+                  resolve({
+                    fileSummary: fileTypes.size ? Array.from(fileTypes).join(', ') : 'your uploads',
+                    fileNames: fileNames.slice(0, 3).join(', '),
+                    linkedinLearning: hasLinkedInLearning,
+                    linkedinCourses: linkedinCourses,
+                    content: fileContents.join('')
+                  });
+                }
+              };
+              reader.readAsText(file);
+            } else {
+              // For non-text files, just add filename info
+              fileContents.push(`File: ${file.name} (${file.type || 'unknown type'})\n`);
+              processed++;
+              if (processed === total) {
+                resolve({
+                  fileSummary: fileTypes.size ? Array.from(fileTypes).join(', ') : 'your uploads',
+                  fileNames: fileNames.slice(0, 3).join(', '),
+                  linkedinLearning: hasLinkedInLearning,
+                  linkedinCourses: linkedinCourses,
+                  content: fileContents.join('')
+                });
+              }
+            }
+          });
+        });
+      }
+
+      function buildPostPrompt(industry, type, uploadData) {
+        const typeLabels = {
+          'thought-leadership': 'Thought Leadership',
+          'career-update': 'Career Update',
+          'project-showcase': 'Project Showcase',
+          'personal-story': 'Personal Story',
+          'advice': 'Advice & Tips'
+        };
+
+        return `A ${typeLabels[type]} post for someone in ${industry} based on ${uploadData.fileSummary}. Use the content in ${uploadData.fileNames || 'the user upload'} to create a strong LinkedIn-ready message.`;
+      }
+
+      // Payment method handling
+      const showPaymentFormBtn = document.getElementById('showPaymentFormBtn');
+      const paymentForm = document.getElementById('paymentForm');
+      const paymentStatus = document.getElementById('paymentStatus');
+      const savePaymentBtn = document.getElementById('savePaymentBtn');
+      const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
+      const paymentMessage = document.getElementById('paymentMessage');
+      let paymentMethod = JSON.parse(localStorage.getItem('launchbrandPayment') || 'null');
+
+      function maskCardNumber(number) {
+        const digits = number.replace(/\D/g, '');
+        return digits.length >= 4 ? '**** **** **** ' + digits.slice(-4) : 'No card saved';
+      }
+
+      function updatePaymentStatus() {
+        if (paymentMethod && paymentMethod.cardNumber) {
+          paymentStatus.innerHTML = `
+            <span><strong>Card on file:</strong> ${maskCardNumber(paymentMethod.cardNumber)}</span>
+            <button class="post-btn primary" id="showPaymentFormBtn">Update Payment Method</button>
+          `;
+          document.getElementById('showPaymentFormBtn').addEventListener('click', showPaymentForm);
+        } else {
+          paymentStatus.innerHTML = `
+            <span><strong>No payment method on file.</strong></span>
+            <button class="post-btn primary" id="showPaymentFormBtn">Add Payment Method</button>
+          `;
+          document.getElementById('showPaymentFormBtn').addEventListener('click', showPaymentForm);
+        }
+      }
+
+      function showPaymentForm() {
+        paymentForm.style.display = 'block';
+        document.getElementById('showPaymentFormBtn').style.display = 'none';
+      }
+
+      function hidePaymentForm() {
+        paymentForm.style.display = 'none';
+        document.getElementById('showPaymentFormBtn').style.display = 'inline-flex';
+        paymentMessage.textContent = 'We do not store real card details on this page. This entry is only for launch workflow simulation.';
+        paymentMessage.classList.remove('payment-success');
+      }
+
+      savePaymentBtn.addEventListener('click', function() {
+        const cardName = document.getElementById('cardName').value.trim();
+        const cardNumber = document.getElementById('cardNumber').value.trim();
+        const cardExpiry = document.getElementById('cardExpiry').value.trim();
+        const cardCvc = document.getElementById('cardCvc').value.trim();
+
+        if (!cardName || !cardNumber || !cardExpiry || !cardCvc) {
+          paymentMessage.textContent = 'Please complete all payment fields before saving.';
+          paymentMessage.classList.remove('payment-success');
+          return;
+        }
+
+        paymentMethod = { cardName, cardNumber, cardExpiry };
+        localStorage.setItem('launchbrandPayment', JSON.stringify(paymentMethod));
+        paymentMessage.textContent = 'Payment method saved. Your service will continue automatically after the trial ends.';
+        paymentMessage.classList.add('payment-success');
+        hidePaymentForm();
+        updatePaymentStatus();
+      });
+
+      cancelPaymentBtn.addEventListener('click', function() {
+        hidePaymentForm();
+      });
+
+      updatePaymentStatus();
+
+      // Sign out — clear session before navigating
+      document.querySelectorAll('a[href="signin.html"]').forEach(link => {
+        link.addEventListener('click', function() {
+          sessionStorage.removeItem('launchbrandCurrentUser');
+        });
+      });
+
+      // Generate posts
+      const generateBtn = document.getElementById('generateBtn');
+      const progressSection = document.getElementById('progressSection');
+      const resultsSection = document.getElementById('resultsSection');
+      const progressFill = document.getElementById('progressFill');
+      const progressText = document.getElementById('progressText');
+      const postsContainer = document.getElementById('postsContainer');
+
+      generateBtn.addEventListener('click', async function() {
+        if (!selectedIndustry || uploadedFiles.length === 0 || !selectedPostType) return;
+
+        progressSection.style.display = 'block';
+        resultsSection.style.display = 'none';
+        generateBtn.disabled = true;
+
+        const uploadData = await analyzeUploadedFiles(uploadedFiles);
+
+        const steps = uploadData.linkedinLearning ? [
+          'Analyzing LinkedIn Learning certificates...',
+          'Extracting course information...',
+          'Understanding your learning achievements...',
+          'Generating AI-powered content...',
+          'Creating professional posts...',
+          'Finalizing posts...'
+        ] : [
+          'Analyzing uploaded files...',
+          'Extracting key insights...',
+          'Understanding your industry context...',
+          'Generating AI-powered content...',
+          'Creating professional posts...',
+          'Finalizing posts...'
+        ];
+
+        for (let i = 0; i < steps.length; i++) {
+          progressText.textContent = steps[i];
+          progressFill.style.width = `${((i + 1) / steps.length) * 100}%`;
+          await new Promise(resolve => setTimeout(resolve, 900));
+        }
+
+        try {
+          const formData = new FormData();
+          formData.append('industry', selectedIndustry);
+          formData.append('postType', selectedPostType);
+          uploadedFiles.forEach(file => formData.append('files', file));
+
+          const response = await fetch('/api/generate-posts', {
+            method: 'POST',
+            body: formData
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || `Server error ${response.status}`);
+          }
+
+          const data = await response.json();
+          displayPosts(data.posts);
+        } catch (error) {
+          alert('Post generation failed: ' + error.message + '\n\nCheck the terminal for details.');
+          console.error('Post generation error:', error);
+        } finally {
+          progressSection.style.display = 'none';
+          resultsSection.style.display = 'block';
+          generateBtn.disabled = false;
+        }
+      });
+
+      const postTemplates = {
+        'thought-leadership': {
+          technology: `I was the least experienced person in the room — and that turned out to be my superpower.\n\nSix weeks into my first tech role, I was assigned to lead a feature demo for engineers twice my experience level.\n\nI almost asked to swap with someone else.\n\nInstead, I spent two nights preparing the kind of questions I wished someone had asked when I started.\n\nHere's what I learned:\n\n→ Asking "why does this work?" earns more respect than pretending you know\n→ Documentation no one reads is an invitation to create better documentation\n→ The developers who grow fastest treat every code review as a teaching moment\n\nYour "beginner's eye" is a feature, not a bug. Own it.\n\nWhat's one thing you wish you knew before your first tech job? 👇\n\n#TechCareer #SoftwareDevelopment #NewGrad #CareerGrowth`,
+          marketing: `The marketing campaign I'm most proud of is the one that completely failed. At first.\n\nWeek one: 0.2% engagement. Half the industry average.\n\nMy first instinct was to hide the numbers. My second was to dig into them.\n\nTurns out, we were talking AT our audience instead of WITH them.\n\nI rebuilt the strategy around one question: "What does this person actually care about at 7pm on a Tuesday?"\n\nWeek two: 3x the engagement.\n\nWhat changed:\n→ We led with their problem, not our product\n→ We used their language, not ours\n→ We asked questions instead of making announcements\n\nThe best marketing insight I ever got wasn't in a textbook. It was from a failed campaign.\n\n#DigitalMarketing #MarketingTips #ContentStrategy #NewGrad`,
+          finance: `My first financial model had 47 errors and a presentation in 3 hours.\n\nI was so focused on looking competent that I didn't ask the questions I needed to ask.\n\nCircular references. Broken formulas. A spreadsheet that crashed twice.\n\nI almost walked out. Instead, I walked to the most intimidating analyst in the room and said: "I'm stuck and I need help."\n\nShe spent 40 minutes with me. Not out of pity — because she'd been there.\n\nWhat I learned:\n\n→ Everyone starts with broken models. The good analysts admit it faster.\n→ Asking for help isn't weakness. It's efficiency.\n→ The skill ceiling in finance is high. The floor is survivable.\n\nWhat's your most valuable first-job lesson?\n\n#Finance #FinanceCareers #NewGrad #CareerAdvice`,
+          healthcare: `I stopped what I was doing to hold a patient's hand for 20 minutes. My supervisor saw me.\n\nI had six tasks on my list. The patient wasn't asking for anything. They were just scared.\n\nI sat down anyway.\n\nWhen my supervisor found me, I braced for a correction on time management.\n\nInstead she said: "That is exactly what patient-centered care looks like."\n\nHealthcare taught me something my textbooks never could:\n\n→ Technical excellence gets you in the room\n→ Presence is what patients actually remember\n→ The "soft skills" aren't soft. They're the hardest part.\n\nWhat moment reminded you why you chose this field?\n\n#Healthcare #ClinicalTraining #HealthcareCareers #PatientCare`,
+          default: `Nobody taught me how to talk about my work. So I had to figure it out the hard way.\n\nFor years, when someone asked "what do you do?" I'd minimize.\n\n"Oh, just an internship." "Just a side project." "Nothing major."\n\nI was terrified of sounding like I was bragging.\n\nThen I read something that changed everything:\n\n*"If you don't tell your story, someone else will. Or no one will."*\n\nI started treating my experiences like case studies:\n→ What was the problem I was solving?\n→ What did I actually do?\n→ What changed because of it?\n\nPersonal branding isn't arrogance. It's clarity.\n\nWhat experience are you underselling right now? 👇\n\n#PersonalBranding #LinkedInStrategy #CareerDevelopment #EarlyCareer`
+        },
+        'career-update': {
+          technology: `Excited to share a milestone from my journey in tech.\n\nSix months ago, I couldn't confidently explain what a REST API was. This week, I shipped a feature end-to-end — solo.\n\nThe gap between those two moments wasn't talent. It was:\n\n→ Showing up even when I felt behind\n→ Asking questions without apologizing for not knowing\n→ Treating every PR review as a free lesson\n\nIf you're early in your tech career and feeling like everyone else "gets it" faster than you — they don't. They're just further along the same curve.\n\nKeep going.\n\n#TechCareer #NewGrad #SoftwareEngineering #CareerGrowth`,
+          default: `Six months ago, I made a decision that scared me.\n\nI applied for a role I was 60% qualified for. I assumed I wouldn't hear back.\n\nI got the interview. Then the offer.\n\nHere's what I've learned since starting:\n\n→ Being the least experienced person in the room is a gift — you ask the questions no one else will\n→ "I don't know, but I'll find out" is one of the most respected phrases in any workplace\n→ Growth doesn't feel like growth while it's happening\n\nTo everyone sitting on an application they haven't sent yet: send it.\n\n#CareerUpdate #NewJob #ProfessionalGrowth #EarlyCareer`
+        },
+        'project-showcase': {
+          technology: `I just shipped something I didn't know how to build three months ago.\n\nThe project: build a feature that would save our team 4 hours of manual work every week.\n\nWeek 1: I had no idea where to start.\nWeek 4: First working prototype.\nWeek 8: Shipped to production.\n\nWhat made the difference:\n\n→ Breaking the problem into pieces small enough to solve in a day\n→ Asking for a code review when I was 70% done, not 100%\n→ Writing documentation as I went (future me is grateful)\n\nThe feature is live. The 4 hours are back. And I learned more in those 8 weeks than in the prior year combined.\n\nWhat's a project you're proud of that not enough people know about?\n\n#SoftwareDevelopment #ProjectShowcase #TechCareer #Engineering`,
+          default: `I just finished a project that started as a class assignment and turned into something I'm genuinely proud of.\n\nThe problem it solved: [brief description of the challenge you tackled]\n\nWhat I built: [what the project actually did]\n\nWhat surprised me along the way:\n\n→ The hardest part wasn't the technical side — it was narrowing the scope\n→ Getting feedback early saved me from rebuilding everything at the end\n→ Presenting work you built yourself feels completely different than presenting work assigned to you\n\nIf you're a student or new grad sitting on a project you haven't shared yet — share it. The work is worth more than you think.\n\n#ProjectShowcase #NewGrad #CareerDevelopment #ProfessionalGrowth`
+        },
+        'personal-story': {
+          default: `I almost didn't put this on my resume. I thought it was too small.\n\nIt was just a class project. Just a volunteer gig. Just an internship at a place most people hadn't heard of.\n\nSo I buried it at the bottom and hoped no one would ask about it.\n\nThen in an interview, the recruiter asked about it specifically.\n\nNot the degree. Not the GPA. The thing I almost left off.\n\n"Walk me through how you approached that," she said.\n\nI did. She leaned forward. We talked about it for 20 minutes.\n\nI got the job.\n\nWhat I learned:\n\n→ Impact isn't always measured in scale — it's measured in intention and outcome\n→ What feels ordinary to you is remarkable to someone who hasn't done it\n→ Your experiences are more hireable than you think when you learn to frame them\n\nStop underselling yourself. What experience are YOU not talking about?\n\n#CareerTips #PersonalBrand #JobSearch #NewGrad`
+        },
+        'advice': {
+          default: `3 things I wish someone told me before my first professional role:\n\n1. You will feel like you don't belong. That feeling is not evidence that you don't.\n\n2. The people who progress fastest aren't the smartest — they're the most curious. Ask more questions than you think is acceptable.\n\n3. Document everything. Your wins, your mistakes, the feedback you received. Six months from now, you won't remember the details. Your future self will thank you.\n\nBonus: nobody has it figured out. They're all improvising at a higher level of experience.\n\nWhat advice do you wish you had at the start of your career?\n\n#CareerAdvice #EarlyCareer #ProfessionalDevelopment #NewGrad`
+        }
+      };
+
+      function generateMockPosts(industry, postType, fileCount, uploadData) {
+        if (uploadData.linkedinLearning && uploadData.linkedinCourses.length > 0) {
+          return generateLinkedInLearningPosts(industry, postType, uploadData.linkedinCourses);
+        }
+
+        const typeTemplates = postTemplates[postType] || postTemplates['thought-leadership'];
+        const content = typeTemplates[industry] || typeTemplates['default'] || postTemplates['thought-leadership']['default'];
+
+        // Generate up to 3 posts, lightly varied
+        const posts = [{ id: 1, content }];
+
+        const thoughtLeadershipAlt = postTemplates['thought-leadership'][industry] || postTemplates['thought-leadership']['default'];
+        const personalStoryAlt = postTemplates['personal-story']['default'];
+
+        if (postType !== 'thought-leadership' && thoughtLeadershipAlt !== content) {
+          posts.push({ id: 2, content: thoughtLeadershipAlt });
+        }
+        if (posts.length < 3 && personalStoryAlt !== content) {
+          posts.push({ id: posts.length + 1, content: personalStoryAlt });
+        }
+
+        return posts.slice(0, Math.min(3, Math.max(1, fileCount)));
+      }
+
+      function generateLinkedInLearningPosts(industry, postType, courses) {
+        const courseList = courses.slice(0, 3).join(', ');
+        const typeTemplates = {
+          'thought-leadership': [
+            `Just completed "${courseList}" on LinkedIn Learning! This course deepened my understanding of how continuous learning drives innovation in ${industry}. The key insight: staying curious and adaptable isn't just a nice-to-have—it's essential for leadership in today's rapidly evolving landscape. What's one skill you've recently learned that transformed your approach to work? #LinkedInLearning #ContinuousLearning #${industry.replace(/\s+/g, '')}`,
+            `Investing in professional development pays dividends. Fresh off completing "${courseList}" on LinkedIn Learning, I'm reminded that expertise is built through deliberate practice and staying current with industry trends. The course reinforced that thought leaders don't just talk about change—they prepare for it. What's your go-to resource for staying ahead in your field? #ProfessionalDevelopment #${industry.replace(/\s+/g, '')} #Leadership`,
+            `Knowledge is power, but applied knowledge is transformation. Just finished "${courseList}" on LinkedIn Learning, and it challenged me to think differently about ${industry} challenges. The course emphasized that true thought leadership comes from combining deep domain expertise with forward-thinking perspectives. How do you balance learning new skills with applying what you already know? #LinkedInLearning #Innovation #ThoughtLeadership`
+          ],
+          'career-update': [
+            `Excited to share that I've completed "${courseList}" on LinkedIn Learning! This course has equipped me with cutting-edge skills that I'm eager to apply in my ${industry} work. Continuous learning isn't just about staying relevant—it's about staying passionate about what we do. What's the most impactful course you've taken recently? #CareerGrowth #LinkedInLearning #${industry.replace(/\s+/g, '')}`,
+            `Professional milestone: Just finished "${courseList}" on LinkedIn Learning. The course provided practical insights that I'm already implementing in my current projects. Investing in yourself is the best investment you can make—both personally and professionally. What's one new skill that's boosted your career this year? #ProfessionalDevelopment #SkillBuilding #LinkedInLearning`,
+            `Growth mindset in action! Completed "${courseList}" on LinkedIn Learning today, and it reinforced the importance of embracing challenges as learning opportunities. The course content was immediately applicable to my ${industry} role, and I'm seeing new possibilities for how I can contribute. What's your favorite way to stay current in your profession? #CareerUpdate #ContinuousLearning #${industry.replace(/\s+/g, '')}`
+          ],
+          'project-showcase': [
+            `Just completed "${courseList}" on LinkedIn Learning, and it directly informed my latest ${industry} project. The course provided frameworks and methodologies that helped me approach the challenge with fresh perspective. Learning new skills and immediately applying them creates a powerful feedback loop for professional growth. What's a recent learning experience that impacted your work? #ProjectSuccess #LinkedInLearning #${industry.replace(/\s+/g, '')}`,
+            `Knowledge applied: Fresh from completing "${courseList}" on LinkedIn Learning, I implemented several concepts in my current project. The course content helped me identify efficiencies and improve outcomes in ways I hadn't considered before. Professional development isn't just about collecting certificates—it's about creating better results. What's the most valuable skill you've learned this year? #ProfessionalDevelopment #ProjectManagement #LinkedInLearning`,
+            `Bridging learning and execution: Just finished "${courseList}" on LinkedIn Learning, and the insights are already showing up in my work. The course challenged my assumptions about ${industry} best practices and opened up new approaches for tackling complex problems. When learning leads to action, that's when real progress happens. What's a course that changed how you approach your projects? #SkillApplication #ContinuousLearning #${industry.replace(/\s+/g, '')}`
+          ],
+          'personal-story': [
+            `A moment of reflection: Just completed "${courseList}" on LinkedIn Learning, and it brought back memories of why I fell in love with ${industry} in the first place. The course reminded me that every expert was once a beginner, and that passion for learning is what keeps us growing. What's the story behind your journey in your profession? #PersonalGrowth #LinkedInLearning #${industry.replace(/\s+/g, '')}`,
+            `From curiosity to competence: My journey with "${courseList}" on LinkedIn Learning taught me that learning is as much about mindset as it is about content. The course challenged me to step outside my comfort zone and embrace new ways of thinking about ${industry} challenges. Every learning experience shapes who we become. What's a learning moment that changed your perspective? #PersonalStory #ProfessionalDevelopment #LinkedInLearning`,
+            `Finding inspiration in unexpected places: Just finished "${courseList}" on LinkedIn Learning, and it rekindled my enthusiasm for ${industry}. The course content connected dots I hadn't seen before and reminded me why I chose this path. Learning isn't just about acquiring knowledge—it's about rediscovering our purpose. What's a recent learning experience that inspired you? #Inspiration #ContinuousLearning #${industry.replace(/\s+/g, '')}`
+          ],
+          'advice': [
+            `Pro tip for ${industry} professionals: Just completed "${courseList}" on LinkedIn Learning, and here's what I learned that could help you too. The course emphasized that staying current with industry trends isn't optional—it's essential for career longevity. My advice: dedicate time each week to learning something new. What's one skill you wish you'd learned earlier in your career? #CareerAdvice #LinkedInLearning #${industry.replace(/\s+/g, '')}`,
+            `Based on my recent completion of "${courseList}" on LinkedIn Learning, here's actionable advice for anyone in ${industry}: Focus on learning skills that complement your existing strengths rather than trying to become a generalist. The course showed me how targeted learning creates compound growth. What's the best career advice you've received recently? #ProfessionalTips #SkillDevelopment #LinkedInLearning`,
+            `Learning lesson: After finishing "${courseList}" on LinkedIn Learning, I realized that the most valuable courses aren't the ones that teach you what to do, but the ones that teach you how to think. In ${industry}, adaptability and critical thinking are your greatest assets. My advice: seek out learning experiences that challenge your assumptions. What's one mindset shift that improved your professional life? #CareerAdvice #ContinuousLearning #${industry.replace(/\s+/g, '')}`
+          ]
+        };
+
+        const templates = typeTemplates[postType] || typeTemplates['career-update'];
+        return templates.map((content, index) => ({
+          id: index + 1,
+          content,
+          timestamp: new Date().toLocaleDateString()
+        }));
+      }
+
+      function displayPosts(posts) {
+        document.getElementById('calendarPreview').style.display = 'block';
+        postsContainer.innerHTML = '';
+        posts.forEach((post, index) => {
+          const postCard = document.createElement('div');
+          postCard.className = 'post-card';
+          postCard.dataset.postIndex = index;
+          postCard.innerHTML = `
+            <h3>Post ${post.id}</h3>
+            <div class="post-content">${post.content.replace(/</g, '&lt;')}</div>
+            <div class="post-actions">
+              <button class="post-btn copy-btn">Copy Text</button>
+              <button class="post-btn primary share-btn">Share to LinkedIn</button>
+            </div>
+          `;
+          postCard.querySelector('.copy-btn').addEventListener('click', function() {
+            navigator.clipboard.writeText(post.content).then(() => {
+              this.textContent = 'Copied!';
+              setTimeout(() => { this.textContent = 'Copy Text'; }, 2000);
+            });
+          });
+          postCard.querySelector('.share-btn').addEventListener('click', function() {
+            const url = `https://www.linkedin.com/feed/?shareActive=true&text=${encodeURIComponent(post.content)}`;
+            window.open(url, '_blank');
+          });
+          postsContainer.appendChild(postCard);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

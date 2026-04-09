@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works - LaunchBrand</title>
+  <meta name="description" content="See LaunchBrand's AI in action. Paste your experience, pick your industry, and watch a high-performing LinkedIn post get generated in seconds." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Steps Overview ─────────────────────── */
+    .steps-section {
+      padding: calc(var(--nav-height) + 80px) 0 80px;
+      background: #FFFFFF;
+    }
+    .steps-header { text-align: center; margin-bottom: 4rem; }
+    .steps-header h1 { margin-bottom: 1.25rem; font-weight: 400; }
+    .steps-header p { font-size: 1.125rem; max-width: 640px; margin: 0 auto; }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+    .step-card {
+      background: white;
+      border-radius: 0;
+      padding: 2rem 1.5rem;
+      border: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+    }
+    .step-card::after {
+      content: '→';
+      position: absolute;
+      top: 50%; right: -1.25rem;
+      transform: translateY(-50%);
+      font-size: 1.25rem;
+      color: var(--primary);
+      font-weight: 400;
+    }
+    .step-card:last-child::after { display: none; }
+    .step-icon {
+      width: 56px; height: 56px;
+      border-radius: 0;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+    }
+    .step-card h3 { font-size: 1rem; margin-bottom: 0.5rem; font-weight: 400; }
+    .step-card p { font-size: 0.875rem; }
+
+    /* ── Feature Details ─────────────────────── */
+    .features-detail { padding: 80px 0; }
+    .feature-detail-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+      margin-bottom: 5rem;
+    }
+    .feature-detail-row:last-child { margin-bottom: 0; }
+    .feature-detail-row.reverse { direction: rtl; }
+    .feature-detail-row.reverse > * { direction: ltr; }
+    .feature-detail-content h2 { margin-bottom: 1rem; font-weight: 400; }
+    .feature-detail-content p { margin-bottom: 1.25rem; }
+    .feature-list { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.25rem; }
+    .feature-list-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.9375rem;
+      color: var(--text);
+    }
+    .feature-list-item .check {
+      width: 22px; height: 22px;
+      background: var(--primary);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: white;
+      font-size: 0.75rem;
+      margin-top: 1px;
+    }
+    .feature-visual {
+      background: var(--bg);
+      border-radius: 0;
+      padding: 2rem;
+      border: 1px solid var(--border);
+    }
+    .feature-visual-inner {
+      background: white;
+      border-radius: 0;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+    }
+    .tag-line {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      font-weight: 500;
+    }
+    .post-preview {
+      font-size: 0.9375rem;
+      color: var(--text);
+      line-height: 1.65;
+    }
+    .post-preview .post-hook { font-weight: 400; margin-bottom: 0.5rem; }
+    .post-preview .post-hashtags { color: var(--primary); font-size: 0.875rem; margin-top: 0.75rem; }
+    .engagement-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .eng-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    .cal-day {
+      aspect-ratio: 1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+    .cal-day.active { background: var(--primary); color: white; }
+    .cal-day.past { background: var(--primary-light); color: var(--primary); }
+    .cal-day.empty { background: var(--bg); color: var(--text-muted); }
+    .cal-label { font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem; text-transform: uppercase; font-weight: 400; letter-spacing: 0.06em; }
+
+    /* ── Demo Section ───────────────────────── */
+    .demo-section { padding: 96px 0; background: var(--bg); }
+    .demo-container {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .demo-header {
+      background: var(--secondary);
+      padding: 2.5rem;
+      color: white;
+    }
+    .demo-header .label { background: rgba(255,255,255,0.15); color: white; margin-bottom: 0.75rem; }
+    .demo-header h2 { color: white; font-size: 1.75rem; margin-bottom: 0.5rem; font-weight: 400; }
+    .demo-header p { color: rgba(255,255,255,0.8); font-size: 1rem; }
+    .demo-body { padding: 2.5rem; }
+    .demo-steps-indicator {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .demo-step-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .demo-step-pill .pill-num {
+      width: 24px; height: 24px;
+      border-radius: 0;
+      background: var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      transition: background 0.3s, color 0.3s;
+    }
+    .demo-step-pill.active .pill-num { background: var(--primary); color: white; }
+    .demo-step-pill.active { color: var(--primary); font-weight: 400; }
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    #demoForm .btn { margin-top: 1rem; width: 100%; justify-content: center; }
+    #demoError {
+      display: none;
+      margin-top: 0.75rem;
+    }
+
+    /* Loading indicator */
+    #demoLoading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2.5rem 0;
+    }
+    .loading-spinner {
+      width: 48px; height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 0;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--text-muted); font-size: 0.9375rem; }
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+    .loading-step {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+    }
+    .loading-step:nth-child(1) { animation-delay: 0.2s; }
+    .loading-step:nth-child(2) { animation-delay: 0.8s; }
+    .loading-step:nth-child(3) { animation-delay: 1.4s; }
+    @keyframes fadeIn { to { opacity: 1; } }
+
+    /* Result */
+    #demoResult { display: none; }
+    .result-post-card {
+      border: 1.5px solid var(--border);
+      border-radius: 0;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .result-post-header {
+      background: #F7F9FC;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .result-post-header span { font-size: 0.875rem; font-weight: 400; color: var(--text-muted); }
+    .result-post-body { padding: 1.5rem; }
+    #generatedPostText {
+      font-size: 0.9375rem;
+      color: var(--text);
+      line-height: 1.75;
+      white-space: pre-line;
+    }
+    .result-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .meta-card {
+      background: var(--bg);
+      border-radius: 0;
+      padding: 1.25rem;
+      border: 1px solid var(--border);
+    }
+    .meta-card .meta-label { font-size: 0.8125rem; color: var(--text-muted); font-weight: 400; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .score-display {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    .score-display #postScore { font-size: 2rem; font-weight: 400; color: var(--primary); }
+    .score-display span { font-size: 1rem; color: var(--text-muted); }
+    .score-bar-bg {
+      height: 8px;
+      background: var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    #scoreBar {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+      transition: width 1s ease;
+      width: 0;
+    }
+    .tips-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .tips-list li {
+      font-size: 0.875rem;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.4rem;
+    }
+    .result-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .result-actions .btn { flex: 1; justify-content: center; min-width: 140px; }
+
+    /* ── FAQ ─────────────────────────────────── */
+    .faq-section { padding: 80px 0; }
+    .faq-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .faq-item {
+      border-radius: 0;
+      padding: 1.75rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .faq-item h4 { margin-bottom: 0.75rem; color: var(--text); font-weight: 400; }
+    .faq-item p { font-size: 0.9375rem; }
+
+    @media (max-width: 900px) {
+      .steps-grid { grid-template-columns: 1fr 1fr; }
+      .step-card::after { display: none; }
+      .feature-detail-row,
+      .feature-detail-row.reverse,
+      .demo-grid { grid-template-columns: 1fr; direction: ltr; }
+      .result-meta { grid-template-columns: 1fr; }
+      .faq-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .steps-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/></svg>
+      </div>
+      LaunchBrand
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="signin.html" class="nav-cta">Sign In</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="how-it-works.html">How It Works</a>
+  <a href="contact.html">Contact</a>
+  <a href="#">Sign In</a>
+</div>
+
+<!-- ── Steps Overview ─────────────────────── -->
+<section class="steps-section">
+  <div class="container">
+    <div class="steps-header fade-in">
+      <div class="label">The Process</div>
+      <h1>From raw experience to<br/><span style="color: var(--primary);">LinkedIn ready posts</span></h1>
+      <p>LaunchBrand uses AI to find the storytelling gold in your background - no writing skills needed.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card fade-in fade-in-delay-1">
+        <div class="step-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        </div>
+        <h3>Paste Your Experience</h3>
+        <p>Resume bullets, internship notes, class project descriptions - anything goes.</p>
+      </div>
+      <div class="step-card fade-in fade-in-delay-2">
+        <div class="step-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <h3>AI Scans for Stories</h3>
+        <p>The AI identifies your most compelling moments and structures them for LinkedIn.</p>
+      </div>
+      <div class="step-card fade-in fade-in-delay-3">
+        <div class="step-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3>Post Is Generated</h3>
+        <p>A full LinkedIn post - hook, narrative, CTA, hashtags - tailored to your industry.</p>
+      </div>
+      <div class="step-card fade-in fade-in-delay-4">
+        <div class="step-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3>Get Your Calendar</h3>
+        <p>Receive a 30 day content plan with post ideas and optimal publishing times.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature Details ─────────────────────── -->
+<section class="features-detail">
+  <div class="container">
+
+    <!-- Story Extraction -->
+    <div class="feature-detail-row">
+      <div class="feature-detail-content fade-in">
+        <div class="label">Story Extraction</div>
+        <h2>Your experience is already story-worthy. You just need the right lens.</h2>
+        <p>Most beginners look at their resume and see "nothing impressive." LaunchBrand's AI sees a first internship presentation that terrified you, a group project that almost fell apart, a volunteer role that taught you something unexpected.</p>
+        <p>Those are exactly the kinds of human stories that perform best on LinkedIn.</p>
+        <div class="feature-list">
+          <div class="feature-list-item"><span class="check">✓</span> Identifies high-resonance moments from any text input</div>
+          <div class="feature-list-item"><span class="check">✓</span> Detects growth narratives, lessons learned, and pivot points</div>
+          <div class="feature-list-item"><span class="check">✓</span> Highlights what recruiters in your industry respond to most</div>
+        </div>
+      </div>
+      <div class="fade-in fade-in-delay-2">
+        <div class="feature-visual">
+          <div class="tag-line">🔍 Analyzed from your input</div>
+          <div class="feature-visual-inner">
+            <p style="font-size:0.9375rem; color:var(--text); margin-bottom:1rem;"><strong>Story found:</strong> "Semester long group project that almost failed in week 3. What you did to save it and what you learned."</p>
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              <span class="badge badge-blue">Growth Moment</span>
+              <span class="badge badge-green">High Resonance</span>
+              <span class="badge badge-amber">Leadership Signal</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post Generation -->
+    <div class="feature-detail-row reverse">
+      <div class="feature-detail-content fade-in">
+        <div class="label">Post Generation</div>
+        <h2>Every post includes a hook, a narrative, and a clear takeaway.</h2>
+        <p>LinkedIn's algorithm rewards posts that make people stop scrolling. That starts with a first line that creates curiosity or contrast - a hook. LaunchBrand structures every post around the three elements that drive engagement consistently.</p>
+        <div class="feature-list">
+          <div class="feature-list-item"><span class="check">✓</span> Compelling first line designed to stop the scroll</div>
+          <div class="feature-list-item"><span class="check">✓</span> Structured narrative with tension and resolution</div>
+          <div class="feature-list-item"><span class="check">✓</span> Industry specific hashtags and optimal post length</div>
+        </div>
+      </div>
+      <div class="fade-in fade-in-delay-2">
+        <div class="feature-visual">
+          <div class="tag-line">✍️ Generated for: Software Engineering</div>
+          <div class="feature-visual-inner">
+            <div class="post-preview">
+              <p class="post-hook">I was the least experienced person in the room - and that was my superpower.</p>
+              <p style="margin-top:0.5rem; color:var(--text-muted);">6 weeks into my first tech role, I was asked to lead a feature demo for engineers twice my experience level…</p>
+              <p class="post-hashtags">#TechCareer #NewGrad #SoftwareDevelopment</p>
+            </div>
+            <div class="engagement-row">
+              <span class="eng-badge">📈 Est. Reach: High</span>
+              <span class="eng-badge">⏱ Read time: 45s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Calendar -->
+    <div class="feature-detail-row">
+      <div class="feature-detail-content fade-in">
+        <div class="label">Content Calendar</div>
+        <h2>Never stare at a blank page again.</h2>
+        <p>Consistency is the single biggest driver of LinkedIn growth. Most beginners post once, get discouraged, and disappear. LaunchBrand generates a 30 day content calendar with specific post ideas for each day, so you always know what to write next.</p>
+        <div class="feature-list">
+          <div class="feature-list-item"><span class="check">✓</span> 30 post ideas tailored to your background and goals</div>
+          <div class="feature-list-item"><span class="check">✓</span> Optimal publishing days and times for your industry</div>
+          <div class="feature-list-item"><span class="check">✓</span> Mix of post types: story, lesson, opinion, celebration</div>
+        </div>
+      </div>
+      <div class="fade-in fade-in-delay-2">
+        <div class="feature-visual">
+          <div class="cal-label">March: 30 Day Plan</div>
+          <div class="feature-visual-inner">
+            <div class="calendar-grid">
+              <div class="cal-day past">3</div>
+              <div class="cal-day empty">4</div>
+              <div class="cal-day past">5</div>
+              <div class="cal-day empty">6</div>
+              <div class="cal-day past">7</div>
+              <div class="cal-day empty">10</div>
+              <div class="cal-day past">11</div>
+              <div class="cal-day empty">12</div>
+              <div class="cal-day past">13</div>
+              <div class="cal-day empty">14</div>
+              <div class="cal-day active">17</div>
+              <div class="cal-day empty">18</div>
+              <div class="cal-day empty">19</div>
+              <div class="cal-day empty">20</div>
+              <div class="cal-day empty">21</div>
+            </div>
+            <p style="font-size:0.8125rem; margin-top:1rem; color:var(--text-muted);">🔵 Today &nbsp;&nbsp; ✅ Published</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+
+<!-- ── FAQ ─────────────────────────────────── -->
+<section class="faq-section">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="label">Common Questions</div>
+      <h2>Everything you need to know</h2>
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item fade-in fade-in-delay-1">
+        <h4>Do I need writing experience?</h4>
+        <p>Not at all. LaunchBrand is specifically built for people who don't consider themselves writers. You provide the raw material - the AI does the writing.</p>
+      </div>
+      <div class="faq-item fade-in fade-in-delay-2">
+        <h4>What if my experience feels basic?</h4>
+        <p>That's exactly who this is designed for. Class projects, part time jobs, volunteer work, and internships are all story worthy experiences. You just need the right framing.</p>
+      </div>
+      <div class="faq-item fade-in fade-in-delay-3">
+        <h4>How many posts can I generate?</h4>
+        <p>The free demo lets you generate unlimited sample posts. Full access includes a complete 30 day content calendar and profile optimization tools.</p>
+      </div>
+      <div class="faq-item fade-in fade-in-delay-4">
+        <h4>Is this just a generic writing AI?</h4>
+        <p>No. It's specifically trained on high performing LinkedIn content patterns for early career professionals. Generic writing tools don't account for LinkedIn's algorithm, engagement signals, or recruiter behavior.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ─────────────────────────────────── -->
+<section class="section-sm" style="background: var(--secondary); padding: 80px 0;">
+  <div class="container" style="text-align:center;">
+    <div class="fade-in">
+      <h2 style="color:white; margin-bottom:1rem;">Ready to build your brand?</h2>
+      <p style="color:rgba(255,255,255,0.75); max-width:480px; margin:0 auto 2rem;">Join the waitlist and be the first to get full access when we launch.</p>
+      <a href="index.html#capture" class="btn btn-accent btn-lg">Get Early Access →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo">
+          <div class="nav-logo-icon">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/></svg>
+          </div>
+          LaunchBrand
+        </a>
+        <p>AI-powered LinkedIn brand builder for early-career professionals.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Pages</h5>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="how-it-works.html">How It Works</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Product</h5>
+        <ul>
+          <li><a href="#demo">AI Demo</a></li>
+          <li><a href="index.html">Early Access</a></li>
+          <li><a href="contact.html">Support</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 LaunchBrand. All rights reserved.</span>
+      <div class="footer-socials">
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Twitter">𝕏</a>
+        <a href="#" aria-label="Instagram">ig</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

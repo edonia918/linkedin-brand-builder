@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact - LaunchBrand</title>
+  <meta name="description" content="Get in touch with the LaunchBrand team. Whether you have questions, feedback, or want to collaborate - we'd love to hear from you." />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Contact Hero ───────────────────────── */
+    .contact-hero {
+      padding: calc(var(--nav-height) + 80px) 0 80px;
+      background: #FFFFFF;
+      text-align: center;
+    }
+    .contact-hero h1 { margin-bottom: 1.25rem; font-weight: 400; }
+    .contact-hero p { font-size: 1.125rem; max-width: 580px; margin: 0 auto; }
+
+    /* ── Contact Grid ───────────────────────── */
+    .contact-grid-section { padding: 80px 0; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 5fr 4fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* ── Contact Form ───────────────────────── */
+    .contact-form-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 2.5rem;
+      box-shadow: var(--shadow-md);
+    }
+    .contact-form-card h2 { margin-bottom: 0.5rem; font-weight: 400; }
+    .contact-form-card > p { margin-bottom: 2rem; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .contact-form-card .btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+    #contactSuccess {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 2rem 0;
+      gap: 1.25rem;
+    }
+    .success-icon-lg {
+      width: 80px; height: 80px;
+      background: var(--success);
+      border-radius: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2.25rem;
+    }
+    #contactSuccess h2 { margin-bottom: 0.5rem; font-weight: 400; }
+    #contactSuccess p { max-width: 380px; }
+    #contactSuccess .btn { margin-top: 0.5rem; display: inline-flex; }
+    .contact-form-card .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .contact-form-card .form-row:last-child {
+      grid-template-columns: 1fr;
+    }
+    .contact-form-card h2 { font-weight: 400; }
+
+    /* ── Contact Info ───────────────────────── */
+    .contact-info-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .contact-info-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0;
+      padding: 1.75rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .contact-info-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+    .contact-info-icon {
+      width: 48px; height: 48px;
+      border-radius: 0;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .contact-info-content h4 { margin-bottom: 0.25rem; color: var(--text); font-weight: 400; }
+    .contact-info-content p { font-size: 0.9375rem; margin: 0; }
+    .contact-info-content a { color: var(--primary); font-weight: 500; }
+    .contact-info-content a:hover { text-decoration: underline; }
+
+    /* Social Links */
+    .social-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      margin-top: 0.25rem;
+    }
+    .social-section h4 { margin-bottom: 1rem; }
+    .social-links {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .social-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      background: white;
+      border: 1px solid var(--border);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .social-link:hover { border-color: var(--primary); color: var(--primary); box-shadow: var(--shadow-sm); }
+
+    /* Response time badge */
+    .response-badge {
+      background: var(--accent-light);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9375rem;
+    }
+    .response-badge strong { color: #92400E; }
+    .response-badge span { color: #78350F; }
+
+    /* ── FAQ Section ────────────────────────── */
+    .faq-mini { padding: 64px 0; background: var(--bg); }
+    .faq-mini .section-header { margin-bottom: 2.5rem; }
+    .faq-accordion {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .faq-acc-item {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .faq-acc-trigger {
+      width: 100%;
+      text-align: left;
+      padding: 1.25rem 1.5rem;
+      background: none;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      transition: color 0.2s;
+    }
+    .faq-acc-trigger:hover { color: var(--primary); }
+    .faq-acc-trigger .chevron {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+      transition: transform 0.25s;
+    }
+    .faq-acc-item.open .faq-acc-trigger { color: var(--primary); }
+    .faq-acc-item.open .chevron { transform: rotate(180deg); }
+    .faq-acc-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.2s;
+    }
+    .faq-acc-item.open .faq-acc-body {
+      max-height: 300px;
+    }
+    .faq-acc-body-inner {
+      padding: 0 1.5rem 1.25rem;
+      font-size: 0.9375rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    @media (max-width: 900px) {
+      .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ─────────────────────────── -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-logo-icon">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/></svg>
+      </div>
+      LaunchBrand
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="signin.html" class="nav-cta">Sign In</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="how-it-works.html">How It Works</a>
+  <a href="contact.html">Contact</a>
+  <a href="#">Sign In</a>
+</div>
+
+<!-- ── Hero ───────────────────────────────── -->
+<section class="contact-hero">
+  <div class="container">
+    <div class="fade-in">
+      <div class="label" style="margin:0 auto 1.25rem;">Get In Touch</div>
+      <h1>Let's talk about your<br/><span style="color: var(--primary);">LinkedIn presence</span></h1>
+      <p>Whether you have questions, feedback, partnership ideas, or just want to say hello - my inbox is open.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Contact Grid ───────────────────────── -->
+<section class="contact-grid-section">
+  <div class="container">
+    <div class="contact-grid">
+
+      <!-- Form -->
+      <div class="contact-form-card fade-in">
+        <h2>Send a Message</h2>
+        <p>I read every message and respond within 24 hours.</p>
+        <form id="contactForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contactFirstName">First Name</label>
+              <input type="text" id="contactFirstName" class="form-control" placeholder="Jane" required />
+            </div>
+            <div class="form-group">
+              <label for="contactLastName">Last Name</label>
+              <input type="text" id="contactLastName" class="form-control" placeholder="Smith" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="contactEmail">Email Address</label>
+            <input type="email" id="contactEmail" class="form-control" placeholder="jane@example.com" required />
+          </div>
+          <div class="form-group">
+            <label for="contactSubject">Subject</label>
+            <select id="contactSubject" class="form-control">
+              <option value="">Select a topic…</option>
+              <option value="demo">Question about the demo</option>
+              <option value="access">Early access / waitlist</option>
+              <option value="feedback">Product feedback</option>
+              <option value="partnership">Partnership or collab</option>
+              <option value="press">Press or media inquiry</option>
+              <option value="other">Something else</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="contactMessage">Message</label>
+            <textarea
+              id="contactMessage"
+              class="form-control"
+              placeholder="Tell me what's on your mind - what are you working on, what do you need, or what questions do you have?"
+              required
+            ></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send Message
+          </button>
+        </form>
+
+        <div id="contactSuccess">
+          <div class="success-icon-lg">✓</div>
+          <div>
+            <h2>Message Sent!</h2>
+            <p>Thank you for reaching out. I'll get back to you within 24 hours - keep an eye on your inbox.</p>
+            <a href="index.html" class="btn btn-primary">Back to Home</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info -->
+      <div class="fade-in fade-in-delay-2">
+        <div class="contact-info-stack">
+
+          <div class="response-badge">
+            <span style="font-size:1.5rem;">⏰</span>
+            <div>
+              <strong>Typical response time: under 24 hours</strong><br/>
+              <span style="font-size:0.875rem;">Mon–Fri, 9am–6pm ET</span>
+            </div>
+          </div>
+
+          <div class="contact-info-card">
+            <div class="contact-info-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div class="contact-info-content">
+              <h4>Email</h4>
+              <p><a href="mailto:hello@launchbrand.co">hello@launchbrand.co</a></p>
+              <p style="font-size:0.875rem; margin-top:0.25rem;">For all general inquiries</p>
+            </div>
+          </div>
+
+          <div class="contact-info-card">
+            <div class="contact-info-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            </div>
+            <div class="contact-info-content">
+              <h4>LinkedIn</h4>
+              <p><a href="#">linkedin.com/in/yourname</a></p>
+              <p style="font-size:0.875rem; margin-top:0.25rem;">Follow for LinkedIn tips and updates</p>
+            </div>
+          </div>
+
+          <div class="contact-info-card">
+            <div class="contact-info-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="contact-info-content">
+              <h4>Office Hours</h4>
+              <p>Monday – Friday, 9am – 6pm ET</p>
+              <p style="font-size:0.875rem; margin-top:0.25rem;">Messages received after hours are answered the next morning</p>
+            </div>
+          </div>
+
+          <div class="social-section">
+            <h4>Follow Along</h4>
+            <div class="social-links">
+              <a href="#" class="social-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+                LinkedIn
+              </a>
+              <a href="#" class="social-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+                Twitter / X
+              </a>
+              <a href="#" class="social-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                Instagram
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ Accordion ──────────────────────── -->
+<section class="faq-mini">
+  <div class="container">
+    <div class="section-header fade-in">
+      <div class="label">Quick Answers</div>
+      <h2>Before you write - check here</h2>
+    </div>
+    <div class="faq-accordion">
+
+      <div class="faq-acc-item fade-in fade-in-delay-1">
+        <button class="faq-acc-trigger" aria-expanded="false">
+          Is LaunchBrand free to use?
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-acc-body">
+          <div class="faq-acc-body-inner">The interactive demo on the How It Works page is completely free with no account required. Full access to the content calendar, profile optimization tools, and unlimited post generation is available through early access sign up.</div>
+        </div>
+      </div>
+
+      <div class="faq-acc-item fade-in fade-in-delay-2">
+        <button class="faq-acc-trigger" aria-expanded="false">
+          I'm a recruiter - can I partner with you?
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-acc-body">
+          <div class="faq-acc-body-inner">Absolutely. We'd love to explore partnerships with career centers, recruiters, and early career programs. Use the contact form above and select "Partnership or collab" as your subject.</div>
+        </div>
+      </div>
+
+      <div class="faq-acc-item fade-in fade-in-delay-3">
+        <button class="faq-acc-trigger" aria-expanded="false">
+          I'm a career coach - is there a referral or affiliate program?
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-acc-body">
+          <div class="faq-acc-body-inner">We're actively building a referral and partner program for career coaches and advisors. Send us a message and we'll add you to our early partner list - you'll be the first to hear when it launches.</div>
+        </div>
+      </div>
+
+      <div class="faq-acc-item fade-in fade-in-delay-4">
+        <button class="faq-acc-trigger" aria-expanded="false">
+          What data do you store from the demo?
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="faq-acc-body">
+          <div class="faq-acc-body-inner">The demo is fully client side. Your experience text is processed in the browser and never sent to our servers. For email signups, we store only your name and email. We don't sell data to third parties.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ────────────────────────────────── -->
+<section class="section-sm" style="background: linear-gradient(135deg, var(--primary-light) 0%, #DBEAFE 100%); padding: 80px 0;">
+  <div class="container" style="text-align:center;">
+    <div class="fade-in">
+      <h2 style="margin-bottom:1rem;">Not sure where to start?</h2>
+      <p style="max-width:480px; margin:0 auto 2rem;">Try the interactive AI demo - it takes 60 seconds and requires no account.</p>
+      <a href="how-it-works.html" class="btn btn-primary btn-lg">Try the Demo →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="nav-logo">
+          <div class="nav-logo-icon">
+            <svg viewBox="0 0 20 20" fill="none"><path d="M10 2L13 8H17L13.5 11.5L15 17L10 14L5 17L6.5 11.5L3 8H7L10 2Z" fill="white"/></svg>
+          </div>
+          LaunchBrand
+        </a>
+        <p>AI-powered LinkedIn brand builder for early-career professionals.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Pages</h5>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="how-it-works.html">How It Works</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Get Started</h5>
+        <ul>
+          <li><a href="how-it-works.html">Try the Demo</a></li>
+          <li><a href="index.html">Early Access</a></li>
+          <li><a href="contact.html">Support</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 LaunchBrand. All rights reserved.</span>
+      <div class="footer-socials">
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Twitter">𝕏</a>
+        <a href="#" aria-label="Instagram">ig</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+<script>
+  // FAQ Accordion
+  document.querySelectorAll('.faq-acc-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const item = trigger.closest('.faq-acc-item');
+      const isOpen = item.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.faq-acc-item').forEach(i => i.classList.remove('open'));
+      // Open clicked (if was closed)
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>
