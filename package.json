@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "vite",
     "dev:server": "nodemon server.js",
-    "build": "vite build"
+    "build": "vite build && cp workspace.html about.html how-it-works.html contact.html styles.css script.js dist/"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",
