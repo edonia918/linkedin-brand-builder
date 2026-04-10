@@ -4,8 +4,7 @@ require('dotenv').config();
 const REQUIRED_ENV = ['JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY'];
 const missing = REQUIRED_ENV.filter(k => !process.env[k] || process.env[k].startsWith('your-'));
 if (missing.length) {
-  console.error(`Missing or placeholder env vars: ${missing.join(', ')}`);
-  process.exit(1);
+  console.warn(`WARNING: Missing or placeholder env vars: ${missing.join(', ')} — some features will not work`);
 }
 
 const express = require('express');
