@@ -8,7 +8,7 @@ if (missing.length) {
 }
 
 const express = require('express');
-const helmet = require('helmet');
+
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
@@ -36,9 +36,6 @@ const PORT = process.env.PORT || 3001;
 app.set('trust proxy', 1);
 
 // ── Security middleware ───────────────────────────────────
-app.use(helmet({
-  contentSecurityPolicy: false
-}));
 
 const allowedOrigins = process.env.ALLOWED_ORIGIN
   ? process.env.ALLOWED_ORIGIN.split(',').map(o => o.trim())

@@ -8,7 +8,7 @@
         "includeFiles": [
           "*.html",
           "styles.css",
-          "script.js",
+          "*.js",
           "images/**"
         ]
       }
