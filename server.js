@@ -695,8 +695,13 @@ app.get('*', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`LaunchBrand server running on port ${PORT}`);
-  console.log(`Frontend available at http://localhost:${PORT}`);
-});
+// Export for Vercel serverless
+module.exports = app;
+
+// Start server locally (Vercel ignores this)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`LaunchBrand server running on port ${PORT}`);
+    console.log(`Frontend available at http://localhost:${PORT}`);
+  });
+}
