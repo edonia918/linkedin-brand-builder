@@ -9,3 +9,5 @@ uploads/
 
 # OS files
 .DS_Store
+.vercel
+dist

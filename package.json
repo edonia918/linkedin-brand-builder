@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "vite",
+    "dev:server": "nodemon server.js",
+    "build": "vite build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.103.0",
@@ -20,9 +22,18 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.5",
     "openai": "^4.0.0",
-    "pdf-parse": "^1.1.1"
+    "pdf-parse": "^1.1.1",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "react-router-dom": "^7.14.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "nodemon": "^3.1.14",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.8"
   }
 }
