@@ -37,7 +37,9 @@ const PORT = process.env.PORT || 3001;
 app.set('trust proxy', 1);
 
 // ── Security middleware ───────────────────────────────────
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false
+}));
 
 const allowedOrigins = process.env.ALLOWED_ORIGIN
   ? process.env.ALLOWED_ORIGIN.split(',').map(o => o.trim())
