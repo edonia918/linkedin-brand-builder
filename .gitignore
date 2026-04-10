@@ -1,0 +1,11 @@
+# Environment variables - never commit secrets
+.env
+
+# Dependencies
+node_modules/
+
+# Uploads directory
+uploads/
+
+# OS files
+.DS_Store

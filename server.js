@@ -1,44 +1,66 @@
 require('dotenv').config();
+
+// ── Startup validation ────────────────────────────────────
+const REQUIRED_ENV = ['JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'OPENROUTER_API_KEY'];
+const missing = REQUIRED_ENV.filter(k => !process.env[k] || process.env[k].startsWith('your-'));
+if (missing.length) {
+  console.error(`Missing or placeholder env vars: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
 const express = require('express');
+const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-const stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.includes('your_stripe_secret_key_here') ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
+const stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.startsWith('sk_test_your') ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Anthropic = require('@anthropic-ai/sdk');
-const path = require('path');
-const fs = require('fs');
+const OpenAI = require('openai');
+const { createClient } = require('@supabase/supabase-js');
+
+
+const isDev = process.env.NODE_ENV !== 'production';
+
+// Supabase client
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-app.use(express.static('.')); // Serve static files
+// Trust proxy (required when behind Render/Heroku/nginx for correct IPs)
+app.set('trust proxy', 1);
 
-// File upload configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
+// ── Security middleware ───────────────────────────────────
+app.use(helmet());
+
+const allowedOrigins = process.env.ALLOWED_ORIGIN
+  ? process.env.ALLOWED_ORIGIN.split(',').map(o => o.trim())
+  : [];
+app.use(cors({
+  origin: (origin, cb) => {
+    // Allow same-origin requests (no origin header) and whitelisted origins
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
   },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname);
-    cb(null, uniqueName);
-  }
-});
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(express.static('.'));
+
+// File upload configuration — memory storage (no disk writes, works on Vercel)
 const upload = multer({
-  storage: storage,
+  storage: multer.memoryStorage(),
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB limit
   },
@@ -50,7 +72,11 @@ const upload = multer({
       'text/plain',
       'application/rtf',
       'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp'
     ];
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
@@ -76,34 +102,34 @@ const emailTransporter = nodemailer.createTransport({
   }
 });
 
-// Anthropic client
-const anthropic = process.env.ANTHROPIC_API_KEY && !process.env.ANTHROPIC_API_KEY.includes('your-anthropic-api-key-here')
-  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  : null;
+// OpenRouter client
+const openrouter = new OpenAI({
+  baseURL: 'https://openrouter.ai/api/v1',
+  apiKey: process.env.OPENROUTER_API_KEY,
+});
 
-// File processing functions
-async function extractTextFromFile(filePath, mimeType) {
+// File processing functions — operate on Buffer directly (memory storage, no disk I/O)
+async function extractTextFromBuffer(buffer, mimeType, filename) {
   try {
-    const buffer = fs.readFileSync(filePath);
-
     if (mimeType === 'application/pdf') {
       const data = await pdfParse(buffer);
       return data.text;
     } else if (mimeType === 'application/msword' ||
                mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      const result = await mammoth.extractRawText({ buffer: buffer });
+      const result = await mammoth.extractRawText({ buffer });
       return result.value;
     } else if (mimeType === 'text/plain' || mimeType === 'application/rtf') {
       return buffer.toString('utf8');
     } else {
-      // For other file types, return filename info
-      return `Content from file: ${path.basename(filePath)}`;
+      return `Content from file: ${filename}`;
     }
   } catch (error) {
     console.error('Error extracting text from file:', error);
-    return `Could not extract text from ${path.basename(filePath)}`;
+    return `Could not extract text from ${filename}`;
   }
 }
+
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 async function analyzeDocumentContent(files) {
   const documentContents = [];
@@ -113,7 +139,18 @@ async function analyzeDocumentContent(files) {
   const education = [];
 
   for (const file of files) {
-    const content = await extractTextFromFile(file.path, file.mimetype);
+    // file.buffer is populated by multer memoryStorage()
+    if (IMAGE_TYPES.includes(file.mimetype)) {
+      documentContents.push({
+        filename: file.originalname,
+        content: '',
+        type: file.mimetype,
+        imageBase64: file.buffer.toString('base64')
+      });
+      continue;
+    }
+
+    const content = await extractTextFromBuffer(file.buffer, file.mimetype, file.originalname);
     documentContents.push({
       filename: file.originalname,
       content: content,
@@ -200,13 +237,10 @@ async function analyzeDocumentContent(files) {
       achievements: achievements.slice(0, 5),
       education: education.slice(0, 3)
     },
-    summary: documentContents.map(doc => doc.content).join('\n\n').substring(0, 2000) // Limit total content
+    summary: documentContents.map(doc => doc.content).join('\n\n').substring(0, 12000)
   };
 }
 
-// In-memory user store (replace with database in production)
-const users = new Map();
-const subscriptions = new Map();
 
 // ── Authentication Routes ─────────────────────────────
 
@@ -223,7 +257,12 @@ app.post('/api/auth/signup', async (req, res) => {
     } = req.body;
 
     // Check if user already exists
-    if (users.has(email)) {
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('email')
+      .eq('email', email)
+      .single();
+    if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
@@ -304,25 +343,37 @@ app.post('/api/auth/signup', async (req, res) => {
     }
 
     // Store user data
-    const user = {
-      id: customer.id,
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      subscriptionId: subscription.id,
-      trialEnd: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
-      createdAt: new Date(),
-      paymentRequired
-    };
+    const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .insert({
+        id: customer.id,
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password: hashedPassword,
+        subscription_id: subscription.id,
+        trial_end: trialEnd,
+        payment_required: paymentRequired
+      })
+      .select()
+      .single();
+    if (userError) throw userError;
 
-    users.set(email, user);
-    subscriptions.set(subscription.id, {
-      userEmail: email,
-      status: subscription.status,
-      currentPeriodEnd: subscription.current_period_end,
-      trialEnd: subscription.trial_end
-    });
+    const { error: subError } = await supabase
+      .from('subscriptions')
+      .insert({
+        id: subscription.id,
+        user_email: email,
+        status: subscription.status,
+        current_period_end: subscription.current_period_end
+          ? new Date(subscription.current_period_end * 1000)
+          : null,
+        trial_end: subscription.trial_end
+          ? new Date(subscription.trial_end * 1000)
+          : trialEnd
+      });
+    if (subError) throw subError;
 
     // Generate JWT token
     const token = jwt.sign(
@@ -336,10 +387,10 @@ app.post('/api/auth/signup', async (req, res) => {
       token,
       user: {
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        firstName: user.first_name,
+        lastName: user.last_name,
         email: user.email,
-        trialEnd: user.trialEnd
+        trialEnd: user.trial_end
       },
       subscription: {
         id: subscription.id,
@@ -358,8 +409,12 @@ app.post('/api/auth/signin', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = users.get(email);
-    if (!user) {
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .single();
+    if (userError || !user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
@@ -380,10 +435,10 @@ app.post('/api/auth/signin', async (req, res) => {
       token,
       user: {
         id: user.id,
-        firstName: user.firstName,
-        lastName: user.lastName,
+        firstName: user.first_name,
+        lastName: user.last_name,
         email: user.email,
-        trialEnd: user.trialEnd
+        trialEnd: user.trial_end
       }
     });
 
@@ -451,7 +506,7 @@ app.post('/api/generate-posts', upload.array('files', 10), async (req, res) => {
     const { industry, postType } = req.body;
     const files = req.files;
 
-    console.log(`[generate-posts] industry=${industry} postType=${postType} files=${files ? files.length : 0} anthropic=${!!anthropic}`);
+    console.log(`[generate-posts] industry=${industry} postType=${postType} files=${files ? files.length : 0}`);
 
     if (!industry || !postType) {
       return res.status(400).json({ message: 'Missing required fields: industry, postType' });
@@ -465,32 +520,55 @@ app.post('/api/generate-posts', upload.array('files', 10), async (req, res) => {
     const analysis = await analyzeDocumentContent(files);
     console.log(`[generate-posts] extracted text length=${analysis.documentContents.map(d => d.content).join('').length} skills=${analysis.extractedData.skills.join(',')}`);
 
-    // Clean up uploaded files after processing
-    files.forEach(file => {
-      try {
-        fs.unlinkSync(file.path);
-      } catch (err) {
-        console.error('Error deleting file:', err);
-      }
-    });
-
     // Generate posts based on analyzed content
     let posts;
-    if (!anthropic) {
-      // Fallback: template-based posts using actual document analysis
+    if (!process.env.OPENROUTER_API_KEY) {
+      // No API key — use template fallback
       posts = generatePostsFromAnalysis(industry, postType, analysis);
     } else {
-      // Use Claude to generate posts based on document analysis
       const prompt = buildPostGenerationPrompt(industry, postType, analysis);
 
-      const message = await anthropic.messages.create({
-        model: 'claude-opus-4-6',
-        max_tokens: 2000,
-        system: 'You are a professional LinkedIn content creator who helps early-career professionals build their personal brand through authentic, engaging posts. Generate high-quality LinkedIn posts that are grounded in the specific content from the uploaded documents — not generic templates. Write in a warm, first-person voice. Never use dashes (- or —) anywhere in the post. Use short paragraphs separated by blank lines instead of long blocks of text or bullet points.',
-        messages: [{ role: 'user', content: prompt }]
-      });
+      // Build multimodal user message: text prompt + any uploaded images
+      const userContent = [{ type: 'text', text: prompt }];
+      for (const doc of analysis.documentContents) {
+        if (doc.imageBase64) {
+          userContent.push({
+            type: 'image_url',
+            image_url: { url: `data:${doc.type};base64,${doc.imageBase64}` }
+          });
+        }
+      }
 
-      const response = message.content[0].text;
+      const messages = [
+        {
+          role: 'system',
+          content: 'You are a professional LinkedIn content creator who helps early-career professionals build their personal brand through authentic, engaging posts. Generate high-quality LinkedIn posts that are grounded in the specific content from the uploaded documents — not generic templates. Write in a warm, first-person voice. Never use dashes (- or —) anywhere in the post. Use short paragraphs separated by blank lines instead of long blocks of text or bullet points.'
+        },
+        { role: 'user', content: userContent }
+      ];
+
+      const PRIMARY_MODEL = 'minimax/minimax-m2.7-20260318';
+      const BACKUP_MODEL  = 'google/gemma-4-31b-it:free';
+
+      let response;
+      try {
+        const message = await openrouter.chat.completions.create({
+          model: PRIMARY_MODEL,
+          max_tokens: 2000,
+          messages
+        });
+        response = message.choices[0].message.content;
+        console.log(`[generate-posts] used model=${PRIMARY_MODEL}`);
+      } catch (primaryErr) {
+        console.warn(`[generate-posts] primary model failed (${primaryErr.message}), falling back to ${BACKUP_MODEL}`);
+        const message = await openrouter.chat.completions.create({
+          model: BACKUP_MODEL,
+          max_tokens: 2000,
+          messages
+        });
+        response = message.choices[0].message.content;
+        console.log(`[generate-posts] used model=${BACKUP_MODEL}`);
+      }
 
       try {
         const parsed = JSON.parse(response);
@@ -663,7 +741,7 @@ function buildPostGenerationPrompt(industry, postType, analysis) {
   return `You are writing 3 LinkedIn posts for a real ${industryDisplay} professional. The posts must be grounded in the specific content from their uploaded documents below — not generic advice.
 
 UPLOADED DOCUMENT CONTENT:
-${fullDocumentText.substring(0, 4000)}
+${fullDocumentText.substring(0, 12000)}
 
 EXTRACTED PROFILE DATA:
 Skills: ${extractedData.skills.join(', ') || 'see documents'}
@@ -726,13 +804,11 @@ app.post('/api/subscription/cancel', async (req, res) => {
       cancel_at_period_end: true
     });
 
-    // Update local subscription status
-    if (subscriptions.has(subscriptionId)) {
-      subscriptions.set(subscriptionId, {
-        ...subscriptions.get(subscriptionId),
-        status: 'canceled'
-      });
-    }
+    // Update subscription status in Supabase
+    await supabase
+      .from('subscriptions')
+      .update({ status: 'canceled' })
+      .eq('id', subscriptionId);
 
     res.json({
       message: 'Subscription will be canceled at the end of the current period',
@@ -771,15 +847,19 @@ app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), asyn
       console.log('Payment failed for invoice:', event.data.object.id);
       break;
 
-    case 'customer.subscription.trial_will_end':
+    case 'customer.subscription.trial_will_end': {
       // Trial is ending soon - send reminder email
       const subscription = event.data.object;
-      const userEmail = subscriptions.get(subscription.id)?.userEmail;
-      if (userEmail) {
-        // Send trial ending reminder
-        await sendTrialEndingEmail(userEmail);
+      const { data: subRow } = await supabase
+        .from('subscriptions')
+        .select('user_email')
+        .eq('id', subscription.id)
+        .single();
+      if (subRow?.user_email) {
+        await sendTrialEndingEmail(subRow.user_email);
       }
       break;
+    }
 
     default:
       console.log(`Unhandled event type ${event.type}`);
