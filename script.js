@@ -20,7 +20,7 @@ if (hamburger && mobileMenu) {
 // ── Auth State & Navigation ───────────────────
 (function initAuthNav() {
   const authUser = JSON.parse(sessionStorage.getItem('launchbrandCurrentUser') || 'null');
-  const path = window.location.pathname.split('/').pop() || 'index.html';
+  const path = window.location.pathname;
   const navLinks = document.querySelector('.nav-links');
   const mobileMenu = document.querySelector('.mobile-menu');
 
@@ -35,7 +35,7 @@ if (hamburger && mobileMenu) {
   function handleSignOut(e) {
     if (e) e.preventDefault();
     clearAuth();
-    window.location.href = 'signin.html';
+    window.location.href = '/signin';
   }
 
   function renderAuthNav() {
@@ -54,7 +54,7 @@ if (hamburger && mobileMenu) {
   }
 
   if (isAuthenticated()) {
-    if (path === 'signin.html') {
+    if (path === '/signin') {
       window.location.href = 'workspace.html';
       return;
     }
@@ -64,8 +64,8 @@ if (hamburger && mobileMenu) {
     if (signOutLink) signOutLink.addEventListener('click', handleSignOut);
     if (signOutLinkMobile) signOutLinkMobile.addEventListener('click', handleSignOut);
   } else {
-    if (path === 'workspace.html') {
-      window.location.href = 'signin.html';
+    if (path === '/workspace.html') {
+      window.location.href = '/signin';
       return;
     }
   }
@@ -73,7 +73,7 @@ if (hamburger && mobileMenu) {
 
 // ── Active Nav Link ───────────────────────────
 (function markActiveLink() {
-  const path = window.location.pathname.split('/').pop() || 'index.html';
+  const path = window.location.pathname;
   document.querySelectorAll('.nav-links a, .mobile-menu a').forEach(a => {
     const href = a.getAttribute('href');
     if (href === path || (path === '' && href === 'index.html')) {

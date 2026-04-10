@@ -44,6 +44,8 @@ app.use(cors({
   origin: (origin, cb) => {
     // Allow same-origin requests (no origin header) and whitelisted origins
     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    // Allow localhost in development
+    if (isDev && origin && new URL(origin).hostname === 'localhost') return cb(null, true);
     cb(new Error('Not allowed by CORS'));
   },
   credentials: true,

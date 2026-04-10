@@ -769,7 +769,7 @@
         <li><a href="how-it-works.html">How It Works</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="workspace.html" class="active">Workspace</a></li>
-        <li><a href="signin.html">Sign Out</a></li>
+        <li><a href="/signin">Sign Out</a></li>
       </ul>
       <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -784,7 +784,7 @@
     <a href="how-it-works.html">How It Works</a>
     <a href="contact.html">Contact</a>
     <a href="workspace.html" class="active">Workspace</a>
-    <a href="signin.html">Sign Out</a>
+    <a href="/signin">Sign Out</a>
   </div>
 
   <!-- ── Workspace ─────────────────────────── -->
@@ -903,7 +903,7 @@
             <h2 style="font-weight:400; margin-bottom:0.5rem;">Your 30-Day Content Calendar</h2>
             <p style="font-size:1rem;">A personalized posting plan generated from your story — unlocked when you subscribe.</p>
           </div>
-          <a href="signin.html" class="btn btn-primary">Unlock Full Calendar →</a>
+          <a href="/signin" class="btn btn-primary">Unlock Full Calendar →</a>
         </div>
 
         <div class="calendar-preview-body">
@@ -1001,7 +1001,7 @@
                   <div class="lock-perk"><span class="check-icon">✓</span> Balanced mix of post types</div>
                   <div class="lock-perk"><span class="check-icon">✓</span> Regenerate anytime with new content</div>
                 </div>
-                <a href="signin.html" class="btn btn-primary btn-lg" style="margin-top:1.5rem;">Get Full Access — $18.99/mo</a>
+                <a href="/signin" class="btn btn-primary btn-lg" style="margin-top:1.5rem;">Get Full Access — $18.99/mo</a>
                 <p style="font-size:0.8125rem; color:var(--text-muted); margin-top:0.75rem;">7-day free trial · Cancel anytime</p>
               </div>
             </div>
@@ -1449,7 +1449,7 @@
       updatePaymentStatus();
 
       // Sign out — clear session before navigating
-      document.querySelectorAll('a[href="signin.html"]').forEach(link => {
+      document.querySelectorAll('a[href="/signin"]').forEach(link => {
         link.addEventListener('click', function() {
           sessionStorage.removeItem('launchbrandCurrentUser');
         });
