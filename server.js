@@ -14,7 +14,6 @@ const rateLimit = require('express-rate-limit');
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-const stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.startsWith('sk_test_your') ? require('stripe')(process.env.STRIPE_SECRET_KEY) : null;
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -247,15 +246,7 @@ async function analyzeDocumentContent(files) {
 
 app.post('/api/auth/signup', async (req, res) => {
   try {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      paymentMethodId,
-      billingAddress,
-      paymentRequired = true
-    } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // Check if user already exists
     const { data: existingUser } = await supabase
@@ -270,111 +261,23 @@ app.post('/api/auth/signup', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    let customer, subscription;
-
-    if (!stripe) {
-      // Mock customer and subscription for development
-      customer = { id: `mock_${Date.now()}` };
-      subscription = { id: `sub_mock_${Date.now()}`, status: 'trialing', trial_end: Math.floor((Date.now() + 7 * 24 * 60 * 60 * 1000) / 1000) };
-    } else if (paymentRequired && paymentMethodId && billingAddress) {
-      // Create customer in Stripe
-      customer = await stripe.customers.create({
-        email,
-        name: `${firstName} ${lastName}`,
-        address: {
-          line1: billingAddress.line1,
-          city: billingAddress.city,
-          state: billingAddress.state,
-          postal_code: billingAddress.postalCode,
-          country: 'US'
-        },
-        payment_method: paymentMethodId,
-        invoice_settings: {
-          default_payment_method: paymentMethodId
-        }
-      });
-
-      // Create subscription with 7-day trial
-      subscription = await stripe.subscriptions.create({
-        customer: customer.id,
-        items: [{
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'LaunchBrand Pro',
-              description: 'AI-powered LinkedIn brand building platform'
-            },
-            unit_amount: 1899, // $18.99
-            recurring: {
-              interval: 'month'
-            }
-          }
-        }],
-        trial_period_days: 7,
-        payment_behavior: 'default_incomplete',
-        expand: ['latest_invoice.payment_intent']
-      });
-    } else {
-      // Create customer without payment method for trial
-      customer = await stripe.customers.create({
-        email,
-        name: `${firstName} ${lastName}`
-      });
-
-      // Create subscription with trial but no payment method yet
-      subscription = await stripe.subscriptions.create({
-        customer: customer.id,
-        items: [{
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'LaunchBrand Pro',
-              description: 'AI-powered LinkedIn brand building platform'
-            },
-            unit_amount: 1899, // $18.99
-            recurring: {
-              interval: 'month'
-            }
-          }
-        }],
-        trial_period_days: 7,
-        payment_behavior: 'default_incomplete',
-        expand: ['latest_invoice.payment_intent']
-      });
-    }
-
-    // Store user data
+    const userId = `user_${Date.now()}`;
     const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
     const { data: user, error: userError } = await supabase
       .from('users')
       .insert({
-        id: customer.id,
+        id: userId,
         first_name: firstName,
         last_name: lastName,
         email,
         password: hashedPassword,
-        subscription_id: subscription.id,
         trial_end: trialEnd,
-        payment_required: paymentRequired
+        payment_required: false
       })
       .select()
       .single();
     if (userError) throw userError;
-
-    const { error: subError } = await supabase
-      .from('subscriptions')
-      .insert({
-        id: subscription.id,
-        user_email: email,
-        status: subscription.status,
-        current_period_end: subscription.current_period_end
-          ? new Date(subscription.current_period_end * 1000)
-          : null,
-        trial_end: subscription.trial_end
-          ? new Date(subscription.trial_end * 1000)
-          : trialEnd
-      });
-    if (subError) throw subError;
 
     // Generate JWT token
     const token = jwt.sign(
@@ -392,11 +295,6 @@ app.post('/api/auth/signup', async (req, res) => {
         lastName: user.last_name,
         email: user.email,
         trialEnd: user.trial_end
-      },
-      subscription: {
-        id: subscription.id,
-        status: subscription.status,
-        trialEnd: subscription.trial_end
       }
     });
 
@@ -792,111 +690,6 @@ function parsePostsFromText(text) {
     content: content,
     timestamp: new Date().toLocaleDateString()
   }));
-}
-
-// ── Subscription Management ─────────────────────────────
-
-app.post('/api/subscription/cancel', async (req, res) => {
-  try {
-    const { subscriptionId } = req.body;
-
-    // Cancel subscription at period end
-    const subscription = await stripe.subscriptions.update(subscriptionId, {
-      cancel_at_period_end: true
-    });
-
-    // Update subscription status in Supabase
-    await supabase
-      .from('subscriptions')
-      .update({ status: 'canceled' })
-      .eq('id', subscriptionId);
-
-    res.json({
-      message: 'Subscription will be canceled at the end of the current period',
-      subscription
-    });
-
-  } catch (error) {
-    console.error('Cancel subscription error:', error);
-    res.status(500).json({ message: 'Failed to cancel subscription', error: error.message });
-  }
-});
-
-// ── Webhook for Stripe Events ─────────────────────────────
-
-app.post('/api/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
-
-  try {
-    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err) {
-    console.log(`Webhook signature verification failed.`, err.message);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-
-  // Handle the event
-  switch (event.type) {
-    case 'invoice.payment_succeeded':
-      // Payment was successful
-      const invoice = event.data.object;
-      console.log('Payment succeeded for invoice:', invoice.id);
-      break;
-
-    case 'invoice.payment_failed':
-      // Payment failed
-      console.log('Payment failed for invoice:', event.data.object.id);
-      break;
-
-    case 'customer.subscription.trial_will_end': {
-      // Trial is ending soon - send reminder email
-      const subscription = event.data.object;
-      const { data: subRow } = await supabase
-        .from('subscriptions')
-        .select('user_email')
-        .eq('id', subscription.id)
-        .single();
-      if (subRow?.user_email) {
-        await sendTrialEndingEmail(subRow.user_email);
-      }
-      break;
-    }
-
-    default:
-      console.log(`Unhandled event type ${event.type}`);
-  }
-
-  res.json({ received: true });
-});
-
-// Helper function to send trial ending email
-async function sendTrialEndingEmail(email) {
-  try {
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: 'Your LaunchBrand Trial is Ending Soon',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #3D5A50;">Your Free Trial Ends Tomorrow</h2>
-          <p>Your 7-day free trial with LaunchBrand is ending tomorrow. Your card will be charged $18.99 unless you cancel your subscription.</p>
-
-          <div style="background: #fff3cd; padding: 20px; border-radius: 0; margin: 20px 0; border-left: 4px solid #ffc107;">
-            <h3 style="margin-top: 0; color: #856404;">Action Required</h3>
-            <p style="margin-bottom: 0;">To avoid being charged, cancel your subscription before the trial ends.</p>
-          </div>
-
-          <a href="#" style="background: #3D5A50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 0; display: inline-block; margin: 20px 0;">Manage Subscription</a>
-
-          <p>Thank you for trying LaunchBrand!</p>
-        </div>
-      `
-    };
-
-    await emailTransporter.sendMail(mailOptions);
-  } catch (error) {
-    console.error('Trial ending email error:', error);
-  }
 }
 
 // ── Serve Frontend ─────────────────────────────
