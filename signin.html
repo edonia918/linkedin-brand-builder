@@ -600,8 +600,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById(formId + 'Error').style.display = 'none';
   }
 
-  function setSessionAuth(user) {
+  function setSessionAuth(user, token) {
     sessionStorage.setItem('launchbrandCurrentUser', JSON.stringify(user));
+    if (token) sessionStorage.setItem('launchbrandToken', token);
   }
 
   function getLocalUsers() {
@@ -632,8 +633,8 @@ document.addEventListener('DOMContentLoaded', function() {
     return error && (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('fetch'));
   }
 
-  async function handleAuthSuccess(user) {
-    setSessionAuth(user);
+  async function handleAuthSuccess(user, token) {
+    setSessionAuth(user, token);
     await sendConfirmationEmail(user.email, 'signin');
     window.location.href = 'workspace.html';
   }
@@ -673,7 +674,7 @@ document.addEventListener('DOMContentLoaded', function() {
         throw new Error(data.message || 'Sign in failed');
       }
 
-      await handleAuthSuccess({ email });
+      await handleAuthSuccess(data.user || { email }, data.token);
     } catch (error) {
       if (isNetworkFailure(error)) {
         const localUser = authenticateLocalUser(email, password);
@@ -749,7 +750,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       await sendConfirmationEmail(email, 'signup');
-      setSessionAuth({ firstName, lastName, email });
+      setSessionAuth(data.user || { firstName, lastName, email }, data.token);
       window.location.href = 'workspace.html';
     } catch (error) {
       if (isNetworkFailure(error)) {
