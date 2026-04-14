@@ -266,7 +266,12 @@ app.post('/api/auth/signup', async (req, res) => {
     // Create auth user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
     console.log('[signup] authError:', authError, 'authUser id:', authData?.user?.id);
-    if (authError) throw authError;
+    if (authError) {
+      if (authError.code === 'user_already_exists') {
+        return res.status(400).json({ message: 'An account with this email already exists. Please sign in instead.' });
+      }
+      throw authError;
+    }
 
     const authUser = authData.user;
     if (!authUser) throw new Error('Supabase Auth returned no user — email confirmation may be required');
