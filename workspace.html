@@ -1270,6 +1270,41 @@
         updateGenerateButton();
       });
 
+      // ── Restore saved preferences and previous posts ──────
+      const savedHistory = sessionStorage.getItem('launchbrandHistory');
+      if (savedHistory) {
+        try {
+          const history = JSON.parse(savedHistory);
+
+          // Pre-fill industry
+          if (history.preferences?.industry) {
+            selectIndustry(history.preferences.industry);
+          }
+
+          // Pre-fill post type
+          if (history.preferences?.post_type) {
+            selectedPostType = history.preferences.post_type;
+            postTypeSelect.value = history.preferences.post_type;
+          }
+
+          // Show previous posts if any exist
+          if (history.posts?.length > 0) {
+            const resultsSection = document.getElementById('resultsSection');
+            const postsContainer = document.getElementById('postsContainer');
+            if (resultsSection && postsContainer) {
+              resultsSection.style.display = 'block';
+              displayPosts(history.posts.slice(0, 3).map((p, i) => ({
+                id: i + 1,
+                content: p.content,
+                timestamp: new Date(p.created_at).toLocaleDateString()
+              })));
+            }
+          }
+        } catch (e) {
+          console.warn('Could not restore history:', e);
+        }
+      }
+
       function updateGenerateButton() {
         const generateBtn = document.getElementById('generateBtn');
         generateBtn.disabled = !selectedIndustry || uploadedFiles.length === 0 || !selectedPostType;
@@ -1500,8 +1535,10 @@
           formData.append('postType', selectedPostType);
           uploadedFiles.forEach(file => formData.append('files', file));
 
+          const token = sessionStorage.getItem('launchbrandToken');
           const response = await fetch('/api/generate-posts', {
             method: 'POST',
+            headers: token ? { 'Authorization': `Bearer ${token}` } : {},
             body: formData
           });
 
@@ -1608,6 +1645,17 @@
         }));
       }
 
+      function formatPostContent(text) {
+        return text
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/(#\w+)/g, '<span style="color:var(--primary)">$1</span>')
+          .replace(/\n/g, '<br>');
+      }
+
       function displayPosts(posts) {
         document.getElementById('calendarPreview').style.display = 'block';
         postsContainer.innerHTML = '';
@@ -1617,7 +1665,7 @@
           postCard.dataset.postIndex = index;
           postCard.innerHTML = `
             <h3>Post ${post.id}</h3>
-            <div class="post-content">${post.content.replace(/</g, '&lt;')}</div>
+            <div class="post-content">${formatPostContent(post.content)}</div>
             <div class="post-actions">
               <button class="post-btn copy-btn">Copy Text</button>
               <button class="post-btn primary share-btn">Share to LinkedIn</button>

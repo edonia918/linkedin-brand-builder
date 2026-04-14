@@ -52,6 +52,20 @@ export function SignIn() {
 
       sessionStorage.setItem('launchbrandCurrentUser', JSON.stringify(data.user))
       sessionStorage.setItem('launchbrandToken', data.token)
+
+      // Fetch saved history and store it for the workspace to use
+      try {
+        const historyRes = await fetch('/api/user/history', {
+          headers: { 'Authorization': `Bearer ${data.token}` }
+        })
+        if (historyRes.ok) {
+          const history = await historyRes.json()
+          sessionStorage.setItem('launchbrandHistory', JSON.stringify(history))
+        }
+      } catch {
+        // History fetch failing should not block login
+      }
+
       window.location.href = '/workspace.html'
     } catch (err: any) {
       setError(err.message || 'Sign in failed')

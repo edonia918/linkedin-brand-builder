@@ -15,8 +15,6 @@ const multer = require('multer');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const nodemailer = require('nodemailer');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const OpenAI = require('openai');
 const { createClient } = require('@supabase/supabase-js');
 
@@ -91,6 +89,24 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use('/api/', limiter);
+
+// ── Auth Middleware ───────────────────────────────────────
+async function requireAuth(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Missing or invalid authorization header' });
+  }
+
+  const token = authHeader.split(' ')[1];
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error || !data.user) {
+    return res.status(401).json({ message: 'Invalid or expired token' });
+  }
+
+  req.user = data.user;
+  next();
+}
 
 // Email transporter
 const emailTransporter = nodemailer.createTransport({
@@ -247,30 +263,21 @@ app.post('/api/auth/signup', async (req, res) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
-    // Check if user already exists
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('email')
-      .eq('email', email)
-      .single();
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    // Create auth user in Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
+    if (authError) throw authError;
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    const userId = `user_${Date.now()}`;
+    const authUser = authData.user;
     const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
+    // Insert profile row linked to the Supabase Auth UUID
     const { data: user, error: userError } = await supabase
       .from('users')
       .insert({
-        id: userId,
+        id: authUser.id,
         first_name: firstName,
         last_name: lastName,
         email,
-        password: hashedPassword,
         trial_end: trialEnd,
         payment_required: false
       })
@@ -278,16 +285,9 @@ app.post('/api/auth/signup', async (req, res) => {
       .single();
     if (userError) throw userError;
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
     res.json({
       message: 'Account created successfully',
-      token,
+      token: authData.session?.access_token,
       user: {
         id: user.id,
         firstName: user.first_name,
@@ -307,30 +307,25 @@ app.post('/api/auth/signin', async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validate credentials with Supabase Auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+
+    // Fetch profile row
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('*')
-      .eq('email', email)
+      .eq('id', authData.user.id)
       .single();
     if (userError || !user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ message: 'Invalid credentials' });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { userId: user.id, email },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
     res.json({
       message: 'Sign in successful',
-      token,
+      token: authData.session.access_token,
       user: {
         id: user.id,
         firstName: user.first_name,
@@ -399,7 +394,7 @@ app.post('/api/email/confirmation', async (req, res) => {
 // ── Post Generation Routes ─────────────────────────────
 
 // File upload and post generation route
-app.post('/api/generate-posts', upload.array('files', 10), async (req, res) => {
+app.post('/api/generate-posts', requireAuth, upload.array('files', 10), async (req, res) => {
   try {
     const { industry, postType } = req.body;
     const files = req.files;
@@ -440,7 +435,7 @@ app.post('/api/generate-posts', upload.array('files', 10), async (req, res) => {
       const messages = [
         {
           role: 'system',
-          content: 'You are a professional LinkedIn content creator who helps early-career professionals build their personal brand through authentic, engaging posts. Generate high-quality LinkedIn posts that are grounded in the specific content from the uploaded documents — not generic templates. Write in a warm, first-person voice. Never use dashes (- or —) anywhere in the post. Use short paragraphs separated by blank lines instead of long blocks of text or bullet points.'
+          content: 'You are a professional LinkedIn content creator who helps early-career professionals build their personal brand through authentic, engaging posts. Generate high-quality LinkedIn posts that are grounded in the specific content from the uploaded documents — not generic templates. Write in a warm, first-person voice. Never use dashes (- or —) anywhere in the post. Use short paragraphs separated by blank lines instead of long blocks of text or bullet points. Always respond with a raw JSON array only — no code fences, no markdown, no explanation before or after the JSON.'
         },
         { role: 'user', content: userContent }
       ];
@@ -468,6 +463,9 @@ app.post('/api/generate-posts', upload.array('files', 10), async (req, res) => {
         console.log(`[generate-posts] used model=${BACKUP_MODEL}`);
       }
 
+      // Strip code fences if the model wrapped the JSON in ```json ... ```
+      response = response.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim();
+
       try {
         const parsed = JSON.parse(response);
         posts = Array.isArray(parsed) ? parsed : parsed.posts || [];
@@ -483,11 +481,65 @@ app.post('/api/generate-posts', upload.array('files', 10), async (req, res) => {
       timestamp: post.timestamp || new Date().toLocaleDateString()
     }));
 
+    // Save to Supabase for session persistence
+    const userId = req.user.id;
+
+    // Save user preferences
+    await supabase.from('user_preferences').upsert({
+      user_id: userId,
+      industry,
+      post_type: postType,
+      updated_at: new Date()
+    });
+
+    // Save extracted document text
+    for (const doc of analysis.documentContents) {
+      await supabase.from('user_documents').insert({
+        user_id: userId,
+        filename: doc.filename,
+        extracted_text: doc.content
+      });
+    }
+
+    // Save generated posts
+    for (const post of formattedPosts) {
+      await supabase.from('generated_posts').insert({
+        user_id: userId,
+        content: post.content,
+        post_type: postType,
+        industry
+      });
+    }
+
     res.json({ posts: formattedPosts });
 
   } catch (error) {
     console.error('Post generation error:', error);
     res.status(500).json({ message: 'Failed to generate posts', error: error.message });
+  }
+});
+
+// ── User History Route ────────────────────────────────────
+
+app.get('/api/user/history', requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const [prefsResult, docsResult, postsResult] = await Promise.all([
+      supabase.from('user_preferences').select('*').eq('user_id', userId).single(),
+      supabase.from('user_documents').select('*').eq('user_id', userId).order('created_at', { ascending: false }),
+      supabase.from('generated_posts').select('*').eq('user_id', userId).order('created_at', { ascending: false })
+    ]);
+
+    res.json({
+      preferences: prefsResult.data || null,
+      documents: docsResult.data || [],
+      posts: postsResult.data || []
+    });
+
+  } catch (error) {
+    console.error('History fetch error:', error);
+    res.status(500).json({ message: 'Failed to fetch history', error: error.message });
   }
 });
 
@@ -665,30 +717,23 @@ Return a JSON array of exactly 3 objects, each with a "content" field containing
 
 function parsePostsFromText(text) {
   // Fallback parsing if JSON parsing fails
-  const lines = text.split('\n').filter(line => line.trim());
-  const posts = [];
-  let currentPost = '';
+  // Split on post boundaries (e.g. "Post 1:", "1.", "---")
+  const postBlocks = text.split(/(?:^|\n)(?:Post \d+[:\.]|\d+\.\s|---+)/i).filter(s => s.trim());
 
-  for (const line of lines) {
-    if (line.match(/^\d+\.|Post \d+:|•/)) {
-      if (currentPost.trim()) {
-        posts.push(currentPost.trim());
-      }
-      currentPost = line.replace(/^\d+\.|Post \d+:|•/, '').trim();
-    } else if (line.trim()) {
-      currentPost += ' ' + line.trim();
-    }
+  if (postBlocks.length >= 2) {
+    return postBlocks.slice(0, 3).map((content, index) => ({
+      id: index + 1,
+      content: content.trim(),
+      timestamp: new Date().toLocaleDateString()
+    }));
   }
 
-  if (currentPost.trim()) {
-    posts.push(currentPost.trim());
-  }
-
-  return posts.slice(0, 3).map((content, index) => ({
-    id: index + 1,
-    content: content,
+  // If no clear boundaries, treat whole text as one post
+  return [{
+    id: 1,
+    content: text.trim(),
     timestamp: new Date().toLocaleDateString()
-  }));
+  }];
 }
 
 // ── Serve Frontend ─────────────────────────────
