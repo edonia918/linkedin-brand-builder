@@ -265,7 +265,6 @@ app.post('/api/auth/signup', async (req, res) => {
 
     // Create auth user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
-    console.log('[signup] authError:', authError, 'authUser id:', authData?.user?.id);
     if (authError) {
       if (authError.code === 'user_already_exists') {
         return res.status(400).json({ message: 'An account with this email already exists. Please sign in instead.' });
@@ -279,7 +278,6 @@ app.post('/api/auth/signup', async (req, res) => {
     const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     // Insert profile row linked to the Supabase Auth UUID
-    console.log('[signup] inserting into users with id:', authUser.id);
     const { data: user, error: userError } = await supabase
       .from('users')
       .insert({
@@ -292,7 +290,6 @@ app.post('/api/auth/signup', async (req, res) => {
       })
       .select()
       .single();
-    console.log('[signup] userError:', userError, 'user:', user?.id);
     if (userError) throw userError;
 
     res.json({
